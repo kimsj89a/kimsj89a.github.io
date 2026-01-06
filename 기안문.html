@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>기안문 작성 도우미 (멀티 파일 지원)</title>
+    <title>기안문 작성 도우미 (AI Powered)</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Markdown Parser -->
@@ -24,11 +24,11 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
         
-        body { font-family: 'Noto Sans KR', sans-serif; }
+        body { font-family: 'Noto Sans KR', sans-serif; user-select: none; /* 텍스트 선택 방지 */ }
         
         /* A4 Paper Preview Styles */
         .preview-wrapper {
-            background-color: #e5e7eb; /* Gray background */
+            background-color: #e5e7eb;
             padding: 2rem;
             height: 100%;
             overflow-y: auto;
@@ -40,76 +40,30 @@
             background-color: white;
             width: 210mm;
             min-height: 297mm;
-            padding: 25mm 20mm; /* A4 Margins */
+            padding: 25mm 20mm;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             color: #000;
-            font-family: 'Malgun Gothic', 'Dotum', sans-serif;
+            /* Default Styles - will be overridden by JS */
+            font-family: 'Malgun Gothic', sans-serif;
             line-height: 1.6;
             font-size: 11pt;
             word-break: keep-all;
+            user-select: text;
         }
 
         /* Markdown Styles simulating Word Document */
-        .a4-page h1 {
-            font-size: 22pt;
-            font-weight: bold;
-            text-align: center;
-            margin-bottom: 30px;
-            letter-spacing: -0.5px;
-        }
-        
-        .a4-page h2 {
-            font-size: 14pt;
-            font-weight: bold;
-            margin-top: 25px;
-            margin-bottom: 10px;
-        }
-        
-        .a4-page h3 {
-            font-size: 12pt;
-            font-weight: bold;
-            margin-top: 15px;
-            margin-bottom: 8px;
-        }
-
-        .a4-page p {
-            margin-bottom: 8px;
-            text-align: justify;
-        }
-
-        .a4-page ul, .a4-page ol {
-            margin-bottom: 10px;
-            padding-left: 20px;
-        }
-
+        .a4-page h1 { font-size: 2.2em; font-weight: bold; text-align: center; margin-bottom: 30px; letter-spacing: -0.5px; }
+        .a4-page h2 { font-size: 1.4em; font-weight: bold; margin-top: 25px; margin-bottom: 10px; }
+        .a4-page h3 { font-size: 1.2em; font-weight: bold; margin-top: 15px; margin-bottom: 8px; }
+        .a4-page p { margin-bottom: 8px; text-align: justify; }
+        .a4-page ul, .a4-page ol { margin-bottom: 10px; padding-left: 20px; }
         .a4-page ul { list-style-type: disc; }
         .a4-page ol { list-style-type: decimal; }
 
-        /* Table Styles (User requested) */
-        .a4-page table {
-            border-collapse: collapse;
-            width: 100%;
-            margin: 15px 0;
-            border: 1px solid #000;
-            font-size: 10pt;
-        }
-        
-        .a4-page th, .a4-page td {
-            border: 1px solid #000;
-            padding: 0px 8px; /* Vertical padding removed */
-            height: 30px; /* Min height for readability */
-            vertical-align: middle;
-        }
-        
-        .a4-page th {
-            background-color: #f3f4f6;
-            font-weight: bold;
-            text-align: center;
-        }
-
-        .a4-page strong {
-            font-weight: bold;
-        }
+        .a4-page table { border-collapse: collapse; width: 100%; margin: 15px 0; border: 1px solid #000; font-size: 0.9em; }
+        .a4-page th, .a4-page td { border: 1px solid #000; padding: 0px 8px; height: 30px; vertical-align: middle; }
+        .a4-page th { background-color: #f3f4f6; font-weight: bold; text-align: center; }
+        .a4-page strong { font-weight: bold; }
 
         /* Loader */
         .loader {
@@ -118,7 +72,7 @@
             border-top: 3px solid #3b82f6;
             width: 24px;
             height: 24px;
-            -webkit-animation: spin 1s linear infinite; /* Safari */
+            -webkit-animation: spin 1s linear infinite;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
@@ -127,7 +81,7 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex flex-col">
+<body class="bg-slate-50 min-h-screen flex flex-col" oncontextmenu="return false" onselectstart="return false" ondragstart="return false">
 
     <!-- Header -->
     <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
@@ -140,7 +94,7 @@
                 </div>
                 <h1 class="text-xl font-bold text-gray-900">기안문 작성 도우미</h1>
             </div>
-            <div class="text-sm text-gray-500">Powered by Google Gemini 3.0</div>
+            <div class="text-sm text-gray-500">Powered by Gemini</div>
         </div>
     </header>
 
@@ -153,24 +107,20 @@
                 
                 <!-- Settings Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                    <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
-                        </svg>
-                        설정
-                    </h2>
-                    
-                    <div class="mb-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Gemini API Key</label>
-                        <input type="password" id="apiKeyInput" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" placeholder="AI Studio에서 발급받은 키" value="AIzaSyBN3KNh8FE6hV-ZLOTOvJvqUxjZ77FK2pc">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" />
+                            </svg>
+                            설정
+                        </h2>
                     </div>
 
                     <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-800">
                         <p class="font-medium mb-1">지원 기능:</p>
                         <ul class="list-disc list-inside space-y-1 text-blue-700 opacity-90 text-xs">
-                            <li>다중 파일 업로드 지원</li>
-                            <li>PDF, Word, Excel, 이미지 지원</li>
-                            <li><strong>HWP</strong>는 PDF로 변환하여 올려주세요.</li>
+                            <li>다중 파일 업로드 (PDF, Word, Excel, 이미지)</li>
+                            <li><strong>HWP</strong>는 PDF로 변환하여 업로드</li>
                             <li>텍스트 인식 불가 시 <strong>자동 이미지 분석</strong></li>
                         </ul>
                     </div>
@@ -202,7 +152,7 @@
                     <div id="fileList" class="mt-4 space-y-2 text-sm text-gray-600 max-h-40 overflow-y-auto hidden"></div>
                 </div>
 
-                <!-- NEW: Additional Instruction Card -->
+                <!-- Additional Instruction Card -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                     <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
@@ -227,15 +177,24 @@
                 <div class="bg-white rounded-xl shadow-sm border border-gray-200 flex flex-col h-full overflow-hidden">
                     <div class="border-b border-gray-200 px-6 py-4 flex items-center justify-between bg-gray-50">
                         <h2 class="text-lg font-semibold text-gray-900">📄 문서 미리보기</h2>
-                        <button id="downloadBtn" disabled class="text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            Word 다운로드
-                        </button>
+                        <div class="flex items-center gap-2">
+                            <!-- Style Edit Button -->
+                            <button id="openStyleModal" class="text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-2 rounded-lg transition-colors flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                                </svg>
+                                문서 스타일 설정
+                            </button>
+                            <button id="downloadBtn" disabled class="text-sm bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Word 다운로드
+                            </button>
+                        </div>
                     </div>
                     
-                    <!-- Modified Preview Container for A4 Look -->
+                    <!-- Preview Container -->
                     <div class="preview-wrapper" id="previewWrapper">
                         <div id="previewContainer" class="a4-page">
                             <!-- Placeholder Content -->
@@ -252,11 +211,84 @@
         </div>
     </main>
 
+    <!-- Style Editor Modal -->
+    <div id="styleModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50 hidden">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center mb-4 border-b pb-2">
+                <h3 class="text-lg font-bold text-gray-900">문서 스타일 설정</h3>
+                <button id="closeStyleModal" class="text-gray-500 hover:text-gray-700">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">기본 폰트 (Font Family)</label>
+                    <select id="styleFont" class="block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                        <option value="'Malgun Gothic', sans-serif" selected>맑은 고딕</option>
+                        <option value="'Batang', serif">바탕 (명조)</option>
+                        <option value="'Dotum', sans-serif">돋움</option>
+                        <option value="'Gulim', sans-serif">굴림</option>
+                        <option value="'Noto Sans KR', sans-serif">Noto Sans KR</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">글자 크기 (Font Size)</label>
+                    <select id="styleSize" class="block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                        <option value="10pt">10pt</option>
+                        <option value="11pt" selected>11pt (기본)</option>
+                        <option value="12pt">12pt</option>
+                        <option value="13pt">13pt</option>
+                    </select>
+                </div>
+                 <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">줄 간격 (Line Height)</label>
+                    <select id="styleLineHeight" class="block w-full border-gray-300 rounded-md shadow-sm p-2 border focus:ring-blue-500 focus:border-blue-500">
+                        <option value="1.4">1.4 (좁게)</option>
+                        <option value="1.6" selected>1.6 (보통)</option>
+                        <option value="1.8">1.8 (넓게)</option>
+                        <option value="2.0">2.0 (매우 넓게)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-2">
+                <button id="saveStyleBtn" class="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 transition-colors w-full">
+                    적용하기
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- Configuration ---
+        // --- SECURITY & PROTECTION SCRIPT ---
+        
+        // Disable F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+U
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) { // F12
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) { // Ctrl+Shift+I
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) { // Ctrl+Shift+J
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) { // Ctrl+U
+                return false;
+            }
+        };
+
+        // --- CONFIGURATION ---
+        
+        // API KEY (Hardcoded) - CAUTION: In a real production environment, use a backend proxy.
+        const API_KEY = "AIzaSyAiHZj3QPw8h55bcG6DdLoqAj5h8KMp1C8"; 
+
+        // FIXED SYSTEM PROMPT
         const SYSTEM_PROMPT = `
 당신은 '기안문 작성 도우미'입니다. 사용자가 제공하는 내용과 참고 자료를 기반으로 기안문을 작성합니다.
-
 
 [기안문 공통 형식]
 1. **제목:** [대상회사명] ~~~의 건(부연설명)
@@ -266,7 +298,7 @@
 \n[지원하는 기안문 종류 및 지침]
 **사전 동의:** 피투자회사의 요청사항에 대해 사전 동의 진행 시 작성.
 **의결권 행사:** 주주총회 또는 이사회 의결권 행사 시 작성.
-**NDA, LOI, LOC 등 문서 결재:** - NDA 작성 시 "반드시" 다음 형식을 따름 (이 경우 공통 형식의 '다음' 항목은 작성하지 않음):
+**NDA, LOI, LOC 등 문서 결재:** - NDA 작성 시 "반드시" 다음 형식을 따름 (이 경우 공통 형식의 '3. 다음' 항목은 작성하지 않음):
      신규 프로젝트([프로젝트명])와 관련하여 다음의 NDA를 체결하고자 하오니 승인하여 주시기 바랍니다.
      
      비밀유지확약서(NDA) 체결의 건
@@ -287,12 +319,12 @@
      | 7 계약 위반 시, 손해배상액의 규모가 구체적이지 않은가? | [Y/N] |
      | 8 그 외 특이 조항이 존재하는가? | [Y/N] |
 
-**다음:** 주요 항목을 나열하며 **음슴체** 사용. (**단, NDA 작성 시에는 이 '다음' 항목을 절대 생성하지 말고 생략하시오.**)
+\n3. **다음:** 주요 항목을 나열하며 **음슴체** 사용. (**단, NDA 작성 시에는 이 '3. 다음' 항목을 절대 생성하지 말고 생략하시오.**)
    - **목적:** 기안 목적 명확화.
    - **주요 내용 요약:** 주요 내용 정리.
    - **의견:** 분석적 의견과 향후 조치사항 등 능동적이고 확정적인 어조**로 작성.
 
-**붙임:** 첨부 자료 명시. 양식은
+\n4. **붙임:** 첨부 자료 명시. 양식은
 붙임1. 
 붙임2. 
 ~
@@ -304,11 +336,17 @@
 - 이미지가 포함된 경우 이미지 내의 텍스트를 읽고 내용을 반영하십시오.
 `;
 
+        // Style State
+        let currentStyles = {
+            fontFamily: "'Malgun Gothic', sans-serif",
+            fontSize: "11pt",
+            lineHeight: "1.6"
+        };
+
         // --- DOM Elements ---
         const fileInput = document.getElementById('multiFile');
         const dropZone = document.getElementById('dropZone');
         const fileListDisplay = document.getElementById('fileList');
-        const apiKeyInput = document.getElementById('apiKeyInput');
         const userInstructionInput = document.getElementById('userInstruction');
         const generateBtn = document.getElementById('generateBtn');
         const btnText = document.getElementById('btnText');
@@ -316,7 +354,59 @@
         const previewContainer = document.getElementById('previewContainer');
         const downloadBtn = document.getElementById('downloadBtn');
 
+        // Style Modal Elements
+        const openStyleModalBtn = document.getElementById('openStyleModal');
+        const styleModal = document.getElementById('styleModal');
+        const closeStyleModalBtn = document.getElementById('closeStyleModal');
+        const saveStyleBtn = document.getElementById('saveStyleBtn');
+        
+        // Style Inputs
+        const styleFontInput = document.getElementById('styleFont');
+        const styleSizeInput = document.getElementById('styleSize');
+        const styleLineHeightInput = document.getElementById('styleLineHeight');
+
         let accumulatedParts = []; // Stores text and inlineData parts
+
+        // --- Style Modal Logic ---
+        openStyleModalBtn.addEventListener('click', () => {
+            // Set current values
+            styleFontInput.value = currentStyles.fontFamily;
+            styleSizeInput.value = currentStyles.fontSize;
+            styleLineHeightInput.value = currentStyles.lineHeight;
+            
+            styleModal.classList.remove('hidden');
+        });
+
+        const closeStyleModal = () => {
+            styleModal.classList.add('hidden');
+        };
+
+        closeStyleModalBtn.addEventListener('click', closeStyleModal);
+        styleModal.addEventListener('click', (e) => {
+            if (e.target === styleModal) closeStyleModal();
+        });
+
+        saveStyleBtn.addEventListener('click', () => {
+            // Update State
+            currentStyles.fontFamily = styleFontInput.value;
+            currentStyles.fontSize = styleSizeInput.value;
+            currentStyles.lineHeight = styleLineHeightInput.value;
+
+            // Apply to Preview
+            updatePreviewStyles();
+            
+            closeStyleModal();
+        });
+
+        function updatePreviewStyles() {
+            const page = document.getElementById('previewContainer');
+            if(page) {
+                page.style.fontFamily = currentStyles.fontFamily;
+                page.style.fontSize = currentStyles.fontSize;
+                page.style.lineHeight = currentStyles.lineHeight;
+            }
+        }
+
 
         // --- Drag & Drop Event Listeners ---
         
@@ -405,11 +495,9 @@
             }
         });
 
-        apiKeyInput.addEventListener('input', checkEnableButton);
-
         generateBtn.addEventListener('click', async () => {
-            const apiKey = apiKeyInput.value.trim();
-            if (!apiKey || accumulatedParts.length === 0) return;
+            // Check only files, API key is now internal
+            if (accumulatedParts.length === 0) return;
 
             setLoading(true, "AI 작성 중...");
             downloadBtn.disabled = true;
@@ -424,7 +512,7 @@
             }
 
             try {
-                const resultMarkdown = await callGemini(apiKey, finalParts);
+                const resultMarkdown = await callGemini(API_KEY, finalParts);
                 renderPreview(resultMarkdown);
                 downloadBtn.disabled = false;
             } catch (err) {
@@ -444,7 +532,8 @@
         // --- Logic ---
 
         function checkEnableButton() {
-            if (accumulatedParts.length > 0 && apiKeyInput.value.trim().length > 0) {
+            // Only check for files
+            if (accumulatedParts.length > 0) {
                 generateBtn.disabled = false;
             } else {
                 generateBtn.disabled = true;
@@ -457,7 +546,7 @@
                 spinner.classList.remove('hidden');
                 btnText.textContent = text;
             } else {
-                if (accumulatedParts.length > 0 && apiKeyInput.value.trim().length > 0) {
+                if (accumulatedParts.length > 0) {
                     generateBtn.disabled = false;
                 }
                 spinner.classList.add('hidden');
@@ -628,9 +717,11 @@
         function renderPreview(markdown) {
             const htmlContent = marked.parse(markdown);
             previewContainer.innerHTML = htmlContent;
+            updatePreviewStyles(); // Apply current styles immediately
         }
 
         function downloadDocx(htmlContent) {
+            const fontName = currentStyles.fontFamily.replace(/'/g, "").split(',')[0].trim();
             const header = `
                 <html xmlns:o='urn:schemas-microsoft-com:office:office' 
                       xmlns:w='urn:schemas-microsoft-com:office:word' 
@@ -639,12 +730,16 @@
                     <meta charset="utf-8">
                     <title>기안문</title>
                     <style>
-                        body { font-family: 'Malgun Gothic', sans-serif; }
-                        h1 { font-size: 22pt; font-weight: bold; text-align: center; margin-bottom: 30px; }
-                        h2 { font-size: 14pt; font-weight: bold; margin-top: 25px; margin-bottom: 10px; }
-                        h3 { font-size: 12pt; font-weight: bold; margin-top: 15px; }
-                        p { margin-bottom: 8px; text-align: justify; line-height: 1.6; }
-                        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; font-size: 10pt; }
+                        body { 
+                            font-family: ${fontName}, sans-serif; 
+                            font-size: ${currentStyles.fontSize};
+                            line-height: ${currentStyles.lineHeight};
+                        }
+                        h1 { font-size: 2.2em; font-weight: bold; text-align: center; margin-bottom: 30px; }
+                        h2 { font-size: 1.4em; font-weight: bold; margin-top: 25px; margin-bottom: 10px; }
+                        h3 { font-size: 1.2em; font-weight: bold; margin-top: 15px; }
+                        p { margin-bottom: 8px; text-align: justify; }
+                        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; font-size: 0.9em; }
                         td, th { border: 1px solid #000; padding: 0px 8px; height: 30px; vertical-align: middle; }
                         th { background-color: #f0f0f0; text-align: center; font-weight: bold; }
                         ul, ol { margin-bottom: 10px; }
@@ -660,15 +755,6 @@
             fileDownload.click();
             document.body.removeChild(fileDownload);
         }
-
-        // API Key Helper
-        const urlParams = new URLSearchParams(window.location.search);
-        const urlKey = urlParams.get('key');
-        if (urlKey) {
-            apiKeyInput.value = urlKey;
-            apiKeyInput.type = "password";
-        }
-
     </script>
 </body>
 </html>

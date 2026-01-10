@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gemini 투자심사보고서 생성기</title>
+    <title>GEM Intern</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -32,9 +32,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
         
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; /* 드래그 방지(선택적) */ }
 
         /* Markdown Preview Styles */
+        .markdown-preview { user-select: text; /* 결과물은 복사 가능하게 */ }
         .markdown-preview h1 { font-size: 1.8em; font-weight: bold; margin-top: 1.5em; margin-bottom: 0.8em; color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3em; }
         .markdown-preview h2 { font-size: 1.4em; font-weight: bold; margin-top: 1.2em; margin-bottom: 0.6em; color: #2563eb; }
         .markdown-preview h3 { font-size: 1.1em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: #475569; }
@@ -62,21 +63,33 @@
         
         .progress-bar-container { width: 100%; background-color: #e2e8f0; border-radius: 9999px; height: 6px; overflow: hidden; margin-top: 10px; }
         .progress-bar { height: 100%; background-color: #3b82f6; width: 0%; transition: width 0.3s ease; }
+
+        /* Copyright Footer */
+        .copyright-footer {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: center;
+            padding: 10px 0;
+            border-top: 1px solid #e2e8f0;
+            margin-top: auto;
+            background-color: #f8fafc;
+        }
     </style>
 </head>
-<body class="text-slate-800 h-screen flex flex-col">
+<!-- Disable Context Menu -->
+<body class="text-slate-800 h-screen flex flex-col" oncontextmenu="return false;">
 
     <!-- Header -->
     <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-10">
         <div class="flex items-center gap-3">
-            <span class="text-3xl">💼</span>
+            <span class="text-3xl">💎</span>
             <div>
-                <h1 class="text-xl font-bold text-slate-800">Gemini 투자심사보고서 생성기</h1>
-                <p class="text-xs text-slate-500">Sequential Workflow & IM Specialist</p>
+                <h1 class="text-xl font-bold text-slate-800">GEM Intern</h1>
+                <p class="text-xs text-slate-500">AI-Powered Investment Analysis Assistant</p>
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded font-medium">Updated: RFI Mode V2</span>
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Secured & Optimized</span>
         </div>
     </header>
 
@@ -113,9 +126,6 @@
                     <option value="low">Low (지연 시간/비용 최소화)</option>
                     <option value="minimal" disabled>Minimal (Flash 전용)</option>
                 </select>
-                <p id="thinking-desc" class="text-xs text-slate-500 mt-1 leading-snug">
-                    깊이 있는 분석을 위해 'High'를 권장합니다.
-                </p>
             </div>
 
             <!-- Image Generation Toggle -->
@@ -132,9 +142,14 @@
             <div class="mb-4 bg-blue-50 p-3 rounded-md border border-blue-100">
                 <h3 class="text-xs font-bold text-blue-800 mb-1">💡 작성 가이드</h3>
                 <div class="text-xs text-blue-700 space-y-2 mt-2">
-                    <p><strong>1. 약식 투자검토:</strong> Word 5페이지 내외의 간결한 요약 보고서를 작성합니다.</p>
-                    <p><strong>5. RFI 작성:</strong> 질문을 입력하면 전문가 관점의 실사 자료 요청 목록을 엑셀로 생성합니다.</p>
+                    <p><strong>1. 약식 투자검토:</strong> 5pg 내외 요약 보고서.</p>
+                    <p><strong>2. RFI 작성:</strong> 질문을 입력하면 전문가 관점의 실사 자료 요청 목록(Excel) 생성.</p>
                 </div>
+            </div>
+
+            <!-- Copyright Footer -->
+            <div class="copyright-footer">
+                <p class="font-bold text-slate-400">Powered and Copyright By Jean Kim</p>
             </div>
         </aside>
 
@@ -153,10 +168,10 @@
                             </label>
                             <select id="template-select" class="text-xs border border-slate-300 rounded px-2 py-1 bg-white text-slate-600 focus:outline-none focus:border-blue-500 cursor-pointer">
                                 <option value="simple_review" selected>1. 약식 투자검토 (요약)</option>
-                                <option value="investment">2. 투자심사보고서 (표준)</option>
-                                <option value="im">3. IM (투자제안서)</option>
-                                <option value="management">4. 사후관리보고서</option>
-                                <option value="rfi">5. RFI 작성 (실사 자료 요청)</option>
+                                <option value="rfi">2. RFI 작성 (실사 자료 요청)</option>
+                                <option value="investment">3. 투자심사보고서 (표준)</option>
+                                <option value="im">4. IM (투자제안서)</option>
+                                <option value="management">5. 사후관리보고서</option>
                                 <option value="custom">6. 직접 입력 (자동 구조화)</option>
                             </select>
                         </div>
@@ -272,7 +287,7 @@
                 </div>
 
                 <!-- Export Buttons -->
-                <div class="p-5 border-t border-slate-200 bg-white flex gap-3">
+                <div class="p-5 border-t border-slate-200 bg-white flex gap-2">
                     <button id="download-docx-btn" class="flex-1 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" disabled>
                         <span>📄 Word 저장</span>
                     </button>
@@ -282,6 +297,9 @@
                     <button id="download-xls-btn" class="hidden flex-1 bg-green-50 border border-green-200 hover:bg-green-100 text-green-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm" disabled>
                         <span>📉 XLS 저장</span>
                     </button>
+                    <button id="copy-btn" class="hidden flex-none bg-gray-50 border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-sm" disabled title="텍스트 복사">
+                        <span>📋</span>
+                    </button>
                 </div>
             </div>
         </main>
@@ -289,6 +307,14 @@
 
     <!-- Application Logic -->
     <script>
+        // --- Security: Prevent F12 & Context Menu ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', event => {
+            if (event.key === 'F12' || (event.ctrlKey && event.shiftKey && event.key === 'I') || (event.ctrlKey && event.key === 'u')) {
+                event.preventDefault();
+            }
+        });
+
         // DOM Elements
         const apiKeyInput = document.getElementById('api-key');
         const modelSelect = document.getElementById('model-select');
@@ -299,7 +325,6 @@
         const diagramToggle = document.getElementById('diagram-toggle');
         const thinkingLevelContainer = document.getElementById('thinking-level-container');
         const thinkingLevelSelect = document.getElementById('thinking-level');
-        const thinkingDesc = document.getElementById('thinking-desc');
         
         // Dynamic UI Elements
         const formatRefLabel = document.getElementById('format-ref-label');
@@ -315,6 +340,7 @@
         const downloadDocxBtn = document.getElementById('download-docx-btn');
         const downloadPptBtn = document.getElementById('download-ppt-btn');
         const downloadXlsBtn = document.getElementById('download-xls-btn');
+        const copyBtn = document.getElementById('copy-btn');
 
         // UI State Elements
         const resultContainer = document.getElementById('result-container');
@@ -372,10 +398,10 @@
         // --- Template Logic ---
         const templates = {
             'simple_review': `# 1. 검토 개요\n   - 검토 배경 및 목적\n   - 대상 기업 요약\n   - 주요 투자 조건\n\n# 2. 회사 현황 (Company Profile)\n   - 설립 및 상장 개요\n   - 주요 사업 현황\n\n# 3. 재무 및 주가 분석\n   - 요약 재무상태 (최근 3년 매출/이익, 자산/부채 현황)\n   - (필요시) 주가 추이 및 거래량 분석\n\n# 4. 주요 동향 및 이슈\n   - 최근 주요 계약\n   - 최근 주요 뉴스\n\n# 5. 종합 의견\n   - 투자 리스크 점검\n   - 최종 검토 의견`,
+            'rfi': `[RFI 작성 모드]\n이 모드에서는 문서 구조가 아닌 '궁금한 사항'을 바탕으로 자료 요청 목록을 생성합니다.\n아래 [대상 기업 및 맥락] 칸에 확인하고 싶은 리스크나 의문점을 적거나, 기존 RFI 표를 붙여넣으세요.`,
             'investment': `# 1. 투자내용 (Executive Summary)\n   - 투자개요 (딜 구조, 구주/신주, 사이즈)\n   - 투자조건 (Valuation, 금액, 단가)\n   - 주요 투자 조건 (RCPS, 만기, 배당, 상환/전환권, Refixing)\n   - 자금사용계획 (CAPEX, OPEX)\n   - 지분율 변화 (Pre/Post 투자)\n\n# 2. 회사현황 (Company Profile)\n   - 회사개요 (대표, 설립일, 주요사업, 위치)\n   - 재무현황 (최근 3~4년 요약 재무제표, 매출/이익 추이)\n\n# 3. 시장분석 (Market Analysis)\n   - 산업 트렌드 (거시 환경, 기회 요인)\n   - 시장 규모 및 전망 (TAM/SAM/SOM, CAGR)\n\n# 4. 사업분석 (Business Analysis)\n   - 비즈니스 모델 (매출원 Breakdown)\n   - 핵심 경쟁력 (기술, 독점력, 인프라)\n   - 경쟁사 비교 (우위 요소)\n\n# 5. 투자 타당성 분석 (Valuation & Exit)\n   - 인수가액 분석 (Multiples, Peer 비교)\n   - Value-up 방안\n   - 회수(Exit) 시나리오 (IPO/M&A 수익률 분석)\n\n# 6. 리스크 분석 (Risk Factors)\n   - 주요 리스크 (사업/재무/법률)\n   - 대응 방안 (Mitigation Plan)\n\n# 7. 종합의견 (Conclusion)\n   - 투자 포인트 요약\n   - 최종 심사 의견`,
             'im': `# 1. Investment Highlights\n   - 핵심 투자 포인트\n\n# 2. Company Overview\n   - 기업 소개\n   - 연혁 및 비전\n\n# 3. Market Opportunity\n   - 시장의 문제점 (Pain Point)\n   - 해결책 (Solution)\n\n# 4. Product & Technology\n   - 주요 제품/서비스\n   - 기술 경쟁력\n\n# 5. Financial Plan\n   - 추정 손익계산서\n   - 자금 소요 계획 (Use of Proceeds)`,
             'management': `# 1. 운용 개요 (Fund Overview)\n   - 펀드 개황\n   - 운용 성과 요약\n\n# 2. 포트폴리오 주요 현황\n   - 피투자기업 실적 요약\n   - 주요 경영 활동\n\n# 3. 주요 이슈 및 점검 사항\n   - Risk 요인 점검\n   - 대응 방안\n\n# 4. 회수(Exit) 현황 및 계획\n   - 회수 실적\n   - 향후 회수 전략`,
-            'rfi': `[RFI 작성 모드]\n이 모드에서는 문서 구조가 아닌 '궁금한 사항'을 바탕으로 자료 요청 목록을 생성합니다.\n아래 [대상 기업 및 맥락] 칸에 확인하고 싶은 리스크나 의문점을 적거나, 기존 RFI 표를 붙여넣으세요.`,
             'custom': ''
         };
 
@@ -390,10 +416,12 @@
             standardButtons.classList.remove('hidden');
             rfiButtons.classList.add('hidden');
             
-            // Export Buttons Default State
+            // Reset all buttons visibility (show docs, hide xls)
             downloadDocxBtn.classList.remove('hidden');
             downloadPptBtn.classList.remove('hidden');
             downloadXlsBtn.classList.add('hidden');
+            copyBtn.classList.remove('hidden'); // Copy is always good
+            
             iconDoc.classList.remove('hidden');
             iconPpt.classList.remove('hidden');
             iconXls.classList.add('hidden');
@@ -418,7 +446,7 @@
                 standardButtons.classList.add('hidden');
                 rfiButtons.classList.remove('hidden');
 
-                // Toggle Export Buttons
+                // Toggle Export Buttons for RFI
                 downloadDocxBtn.classList.add('hidden');
                 downloadPptBtn.classList.add('hidden');
                 downloadXlsBtn.classList.remove('hidden');
@@ -619,6 +647,18 @@
             return newText;
         }
 
+        // --- Copy to Clipboard ---
+        copyBtn.addEventListener('click', () => {
+            if (!generatedText) return;
+            const textarea = document.createElement('textarea');
+            textarea.value = generatedText;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert("📋 텍스트가 클립보드에 복사되었습니다.");
+        });
+
 
         // --- Core Generation Logic ---
         async function generateContent(mode) {
@@ -659,7 +699,7 @@
             generatePptBtn.classList.add('opacity-50');
             generateRfiBtn.classList.add('opacity-50');
             
-            // Mode Badge
+            // Mode Badge & Button Highlight
             if (selectedTemplate === 'rfi') {
                 modeBadge.innerText = "Mode: RFI (Excel)";
                 modeBadge.className = "px-2 py-1 text-xs font-bold rounded bg-green-100 text-green-700";
@@ -824,7 +864,6 @@
                         }];
 
                         if(uploadedDataFiles.length) promptParts.push({ text: "\n=== [분석 데이터] ===\n" });
-                        // ... (File appending logic remains same)
                         uploadedDataFiles.forEach(f => f.text ? promptParts.push({text: f.text}) : promptParts.push({inlineData: {mimeType: f.mimeType, data: f.data}}));
                         
                         if(uploadedFormatFiles.length) promptParts.push({ text: "\n=== [서식 참고] ===\n" });
@@ -865,12 +904,10 @@
                 markdownOutput.classList.remove('hidden');
                 
                 // Final Enable
-                if (selectedTemplate === 'rfi') {
-                    downloadXlsBtn.disabled = false;
-                } else {
-                    downloadDocxBtn.disabled = false;
-                    downloadPptBtn.disabled = false;
-                }
+                downloadDocxBtn.disabled = false;
+                downloadPptBtn.disabled = false;
+                downloadXlsBtn.disabled = false;
+                copyBtn.disabled = false;
 
             } catch (e) {
                 if (e.name !== 'AbortError') alert(`오류: ${e.message}`);
@@ -891,7 +928,7 @@
 
         generateWordBtn.addEventListener('click', () => generateContent('WORD'));
         generatePptBtn.addEventListener('click', () => generateContent('PPT'));
-        generateRfiBtn.addEventListener('click', () => generateContent('RFI')); // Added Handler
+        generateRfiBtn.addEventListener('click', () => generateContent('RFI')); 
         stopBtn.addEventListener('click', () => abortController?.abort());
 
 

@@ -32,7 +32,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
         
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; /* 드래그 방지(선택적) */ }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; /* 드래그 방지 */ }
 
         /* Markdown Preview Styles */
         .markdown-preview { user-select: text; /* 결과물은 복사 가능하게 */ }
@@ -76,7 +76,7 @@
         }
     </style>
 </head>
-<!-- Disable Context Menu -->
+<!-- Disable Context Menu and F12 -->
 <body class="text-slate-800 h-screen flex flex-col" oncontextmenu="return false;">
 
     <!-- Header -->
@@ -89,8 +89,8 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v2.8</span>
-            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Reordered Layout</span>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v2.9</span>
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Reorganized Layout</span>
         </div>
     </header>
 
@@ -144,7 +144,7 @@
                 <h3 class="text-xs font-bold text-blue-800 mb-1">💡 작성 가이드</h3>
                 <div class="text-xs text-blue-700 space-y-2 mt-2">
                     <p><strong>1. 약식 투자검토:</strong> 5pg 내외 요약 보고서.</p>
-                    <p><strong>2. RFI 작성:</strong> 질문과 보유 자료 목록을 바탕으로 추가 요청 리스트 생성.</p>
+                    <p><strong>2. RFI 작성:</strong> 질문을 입력하면 전문가 관점의 실사 자료 요청 목록(Excel) 생성.</p>
                 </div>
             </div>
 
@@ -160,7 +160,8 @@
             <!-- Input Column -->
             <div class="flex-1 flex flex-col border-r border-slate-200 bg-white min-w-[400px]">
                 <div class="p-5 flex-1 flex-col overflow-y-auto">
-                    <!-- 1. Structure -->
+                    
+                    <!-- 1. Structure (Common) -->
                     <div class="mb-4 flex flex-col transition-all duration-300" id="structure-container">
                         <div class="flex justify-between items-end mb-2">
                             <label class="block text-sm font-bold text-slate-800 flex items-center gap-2">
@@ -179,11 +180,12 @@
                         <textarea id="structure-input" class="w-full h-48 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y font-mono text-sm shadow-sm transition-all duration-300" placeholder="템플릿을 선택하거나 직접 구조를 입력하세요."></textarea>
                     </div>
 
-                    <!-- FOLDER INDEXER (RFI Mode Only) -->
+                    <!-- 2. Folder Indexer (RFI Only) -->
                     <div id="folder-indexer-section" class="hidden mb-4 flex-1 flex flex-col min-h-0 border-2 border-dashed border-green-200 rounded-xl bg-green-50 p-4 relative group hover:border-green-400 transition-colors">
                         <div class="flex items-center justify-between mb-2">
-                            <label class="text-sm font-bold text-green-800 flex items-center gap-2">
-                                <span class="text-lg">📁</span> 보유 자료 폴더 스캔 (Folder Scan)
+                            <label id="folder-label" class="text-sm font-bold text-green-800 flex items-center gap-2">
+                                <span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span>
+                                📁 보유 자료 폴더 스캔
                             </label>
                             <span class="text-xs text-green-600 font-medium" id="folder-count">0 files</span>
                         </div>
@@ -191,22 +193,18 @@
                             <p>폴더를 이곳에 드래그하세요. 하위 폴더까지 스캔합니다.</p>
                             <p class="opacity-75 mt-1">(자료는 실제로 서버에 업로드되지 않으며, 파일명 목록만 추출합니다)</p>
                         </div>
-                        
-                        <!-- Scanned List -->
                         <div class="flex-1 overflow-y-auto bg-white border border-green-200 rounded-lg p-2 text-xs font-mono text-slate-600 shadow-inner max-h-[150px]" id="scanned-file-list">
                             <p class="text-center text-gray-300 py-4 italic">대기 중...</p>
                         </div>
-                        <!-- Overlay for Drag -->
                         <input type="file" id="folder-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" webkitdirectory directory multiple>
                     </div>
 
-                    <!-- 2. File Uploads (Moved Up) -->
-                    <div class="space-y-4 mb-6" id="file-upload-section">
-                        <!-- Raw Data -->
+                    <!-- 3. Raw Data (Common) -->
+                    <div class="space-y-4 mb-6">
                         <div>
-                            <label id="file-upload-label" class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
-                                <span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span>
-                                분석할 데이터 (Contents Analysis)
+                            <label id="raw-data-label" class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                <span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="raw-data-badge">2</span>
+                                분석할 데이터 (Raw Data)
                             </label>
                             <div id="drop-zone-data" class="border-2 border-dashed border-slate-300 rounded-lg p-3 hover:bg-slate-50 transition-colors text-center cursor-pointer group">
                                 <input type="file" id="file-input-data" class="hidden" multiple accept=".pdf,.docx,.pptx,.xlsx,.xls,.txt,.md,.csv,.jpg,.png">
@@ -217,11 +215,31 @@
                             </div>
                             <div id="file-list-data" class="mt-2 space-y-1"></div>
                         </div>
+                    </div>
 
-                        <!-- Format Ref -->
+                    <!-- 4. Context (Common) -->
+                    <div class="mb-6">
+                        <label id="context-label" class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="context-badge">3</span>
+                            대상 기업 및 맥락 (Context)
+                        </label>
+                        <textarea id="context-input" class="w-full h-24 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y text-sm shadow-sm" placeholder="예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등..."></textarea>
+                    </div>
+
+                    <!-- 5. Existing RFI (RFI Only) -->
+                    <div id="existing-rfi-section" class="hidden mb-6">
+                        <label class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                            <span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">5</span>
+                            기존 RFI Copy & Paste
+                        </label>
+                        <textarea id="existing-rfi-input" class="w-full h-32 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-y text-sm shadow-sm" placeholder="기존에 작성된 RFI 표가 있다면 이곳에 붙여넣으세요."></textarea>
+                    </div>
+
+                    <!-- 6. Format Ref (Common - Moved to Bottom) -->
+                    <div class="space-y-4 mb-2">
                         <div>
                             <label class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
-                                <span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="format-ref-number">4</span>
+                                <span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="format-ref-badge">4</span>
                                 <span id="format-ref-label">서식 참고 (Format Ref)</span>
                             </label>
                             <div id="drop-zone-format" class="border-2 border-dashed border-slate-300 rounded-lg p-3 hover:bg-slate-50 transition-colors text-center cursor-pointer group">
@@ -233,24 +251,6 @@
                             </div>
                             <div id="file-list-format" class="mt-2 space-y-1"></div>
                         </div>
-                    </div>
-
-                    <!-- 3. Context / Questions (Moved Down) -->
-                    <div class="mb-6" id="context-section">
-                        <label id="context-label" class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
-                            <span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span>
-                            대상 기업 및 맥락 (Context)
-                        </label>
-                        <textarea id="context-input" class="w-full h-24 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y text-sm shadow-sm" placeholder="예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등..."></textarea>
-                    </div>
-
-                    <!-- 4. Existing RFI (RFI Mode Only) - Moved to bottom of input area -->
-                    <div id="existing-rfi-section" class="hidden mb-6">
-                        <label class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
-                            <span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">4</span>
-                            기존 RFI Copy & Paste
-                        </label>
-                        <textarea id="existing-rfi-input" class="w-full h-32 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-y text-sm shadow-sm" placeholder="기존에 작성된 RFI 표가 있다면 이곳에 붙여넣으세요."></textarea>
                     </div>
 
                 </div>
@@ -356,7 +356,7 @@
         const modelSelect = document.getElementById('model-select');
         const structureInput = document.getElementById('structure-input');
         const contextInput = document.getElementById('context-input');
-        const contextLabel = document.getElementById('context-label');
+        const contextLabel = document.getElementById('context-label'); // Label for Badge
         const templateSelect = document.getElementById('template-select');
         const diagramToggle = document.getElementById('diagram-toggle');
         const thinkingLevelContainer = document.getElementById('thinking-level-container');
@@ -371,8 +371,11 @@
         // New Elements for Split RFI Input
         const existingRfiSection = document.getElementById('existing-rfi-section');
         const existingRfiInput = document.getElementById('existing-rfi-input');
-        const fileUploadLabel = document.getElementById('file-upload-label');
-        const formatRefNumber = document.getElementById('format-ref-number');
+        
+        // Number Badges elements
+        const rawDataBadge = document.getElementById('raw-data-badge');
+        const contextBadge = document.getElementById('context-badge');
+        const formatRefBadge = document.getElementById('format-ref-badge');
 
         // Dynamic UI Elements
         const formatRefLabel = document.getElementById('format-ref-label');
@@ -409,7 +412,7 @@
         let generatedText = "";
         let uploadedDataFiles = [];
         let uploadedFormatFiles = [];
-        let scannedFolderFiles = []; // For RFI Indexing
+        let scannedFolderFiles = []; 
         let abortController = null;
         let currentMode = null; 
 
@@ -448,7 +451,7 @@
         // --- Template Logic ---
         const templates = {
             'simple_review': `# 1. 검토 개요\n   - 검토 배경 및 목적\n   - 대상 기업 요약\n   - 주요 투자 조건\n\n# 2. 회사 현황 (Company Profile)\n   - 설립 및 상장 개요\n   - 주요 사업 현황\n\n# 3. 재무 및 주가 분석\n   - 요약 재무상태 (최근 3년 매출/이익, 자산/부채 현황)\n   - (필요시) 주가 추이 및 거래량 분석\n\n# 4. 주요 동향 및 이슈\n   - 최근 주요 계약\n   - 최근 주요 뉴스\n\n# 5. 종합 의견\n   - 투자 리스크 점검\n   - 최종 검토 의견`,
-            'rfi': `[RFI 작성 모드]\n이 모드에서는 문서 구조가 아닌 '궁금한 사항'을 바탕으로 자료 요청 목록을 생성합니다.\n아래 [3. 추가 질문 및 확인 사항] 칸에 확인하고 싶은 리스크나 의문점을 적거나, [4. 기존 RFI]에 표를 붙여넣으세요.`,
+            'rfi': `[RFI 작성 모드]\n이 모드에서는 문서 구조가 아닌 '궁금한 사항'을 바탕으로 자료 요청 목록을 생성합니다.\n아래 [4. 추가 질문 및 확인 사항] 칸에 확인하고 싶은 리스크나 의문점을 적거나, [5. 기존 RFI]에 표를 붙여넣으세요.`,
             'investment': `# 1. 투자내용 (Executive Summary)\n   - 투자개요 (딜 구조, 구주/신주, 사이즈)\n   - 투자조건 (Valuation, 금액, 단가)\n   - 주요 투자 조건 (RCPS, 만기, 배당, 상환/전환권, Refixing)\n   - 자금사용계획 (CAPEX, OPEX)\n   - 지분율 변화 (Pre/Post 투자)\n\n# 2. 회사현황 (Company Profile)\n   - 회사개요 (대표, 설립일, 주요사업, 위치)\n   - 재무현황 (최근 3~4년 요약 재무제표, 매출/이익 추이)\n\n# 3. 시장분석 (Market Analysis)\n   - 산업 트렌드 (거시 환경, 기회 요인)\n   - 시장 규모 및 전망 (TAM/SAM/SOM, CAGR)\n\n# 4. 사업분석 (Business Analysis)\n   - 비즈니스 모델 (매출원 Breakdown)\n   - 핵심 경쟁력 (기술, 독점력, 인프라)\n   - 경쟁사 비교 (우위 요소)\n\n# 5. 투자 타당성 분석 (Valuation & Exit)\n   - 인수가액 분석 (Multiples, Peer 비교)\n   - Value-up 방안\n   - 회수(Exit) 시나리오 (IPO/M&A 수익률 분석)\n\n# 6. 리스크 분석 (Risk Factors)\n   - 주요 리스크 (사업/재무/법률)\n   - 대응 방안 (Mitigation Plan)\n\n# 7. 종합의견 (Conclusion)\n   - 투자 포인트 요약\n   - 최종 심사 의견`,
             'im': `# 1. Investment Highlights\n   - 핵심 투자 포인트\n\n# 2. Company Overview\n   - 기업 소개\n   - 연혁 및 비전\n\n# 3. Market Opportunity\n   - 시장의 문제점 (Pain Point)\n   - 해결책 (Solution)\n\n# 4. Product & Technology\n   - 주요 제품/서비스\n   - 기술 경쟁력\n\n# 5. Financial Plan\n   - 추정 손익계산서\n   - 자금 소요 계획 (Use of Proceeds)`,
             'management': `# 1. 운용 개요 (Fund Overview)\n   - 펀드 개황\n   - 운용 성과 요약\n\n# 2. 포트폴리오 주요 현황\n   - 피투자기업 실적 요약\n   - 주요 경영 활동\n\n# 3. 주요 이슈 및 점검 사항\n   - Risk 요인 점검\n   - 대응 방안\n\n# 4. 회수(Exit) 현황 및 계획\n   - 회수 실적\n   - 향후 회수 전략`,
@@ -460,26 +463,29 @@
 
         // --- Template Selection & UI Update ---
         function updateUIForTemplate(val) {
-            // Defaults (Standard Mode)
-            formatRefLabel.innerText = "서식 참고 (Format Ref)";
-            formatRefText.innerText = "기존 보고서 샘플 드래그 & 드롭";
-            standardButtons.classList.remove('hidden');
-            rfiButtons.classList.add('hidden');
+            // Default: Standard Document Mode
             folderIndexerSection.classList.add('hidden'); 
             existingRfiSection.classList.add('hidden'); 
             structureInput.classList.replace('h-32', 'h-48'); 
             structureInput.disabled = false;
             
-            // Labels
-            fileUploadLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span> 분석할 데이터 (Contents Analysis)`;
-            contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span> 대상 기업 및 맥락 (Context)`;
-            formatRefNumber.textContent = "4";
-
-            // Reset buttons
+            standardButtons.classList.remove('hidden');
+            rfiButtons.classList.add('hidden');
+            
+            // Default Numbering (Normal Mode)
+            rawDataBadge.textContent = "2";
+            contextBadge.textContent = "3";
+            formatRefBadge.textContent = "4";
+            
+            // Labels & Placeholders
+            formatRefLabel.innerText = "서식 참고 (Format Ref)";
+            formatRefText.innerText = "기존 보고서 샘플 드래그 & 드롭";
+            contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="context-badge">3</span> 대상 기업 및 맥락 (Context)`;
+            
+            // Export Buttons
             downloadDocxBtn.classList.remove('hidden');
             downloadPptBtn.classList.remove('hidden');
             downloadXlsBtn.classList.add('hidden');
-            
             iconDoc.classList.remove('hidden');
             iconPpt.classList.remove('hidden');
             iconXls.classList.add('hidden');
@@ -493,25 +499,28 @@
                 structureInput.value = templates['rfi'];
                 structureInput.disabled = true; 
                 
-                // RFI UI Specifics
+                // RFI UI Changes
                 folderIndexerSection.classList.remove('hidden'); 
                 existingRfiSection.classList.remove('hidden'); 
                 structureInput.classList.replace('h-48', 'h-24'); 
-                
-                // Re-number labels for RFI mode layout (Structure -> File -> Context -> RFI)
-                fileUploadLabel.innerHTML = `<span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span> 분석할 데이터 (Contents Analysis)`;
-                contextLabel.innerHTML = `<span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span> 추가 질문 및 확인 사항 (Questions)`;
-                formatRefNumber.textContent = "4"; // No change actually, just same slot used differently
 
+                // RFI Numbering
+                // 1. Template (Fixed)
+                // 2. Folder Scan
+                rawDataBadge.textContent = "3";
+                contextBadge.textContent = "4";
+                // 5 is Existing RFI (Label hardcoded in HTML for this section)
+                formatRefBadge.textContent = "6";
+
+                contextLabel.innerHTML = `<span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">4</span> 추가 질문 및 확인 사항 (Questions)`;
                 contextInput.placeholder = "예: 재고가 너무 많이 쌓여있는 것 같은데 확인하고 싶어, 대표이사 횡령 이슈 체크";
                 
-                formatRefLabel.innerText = "기존 RFI 서식 (선택 사항)"; // Removed numbering in label itself, handled by span
+                formatRefLabel.innerText = "서식 참고 (선택 사항)";
                 formatRefText.innerText = "기존 엑셀/PDF 양식 드래그 & 드롭";
                 
                 standardButtons.classList.add('hidden');
                 rfiButtons.classList.remove('hidden');
 
-                // Toggle Export Buttons for RFI
                 downloadDocxBtn.classList.add('hidden');
                 downloadPptBtn.classList.add('hidden');
                 downloadXlsBtn.classList.remove('hidden');
@@ -656,7 +665,6 @@
 
         async function processFile(file) {
             const item = { name: file.name, mimeType: file.type, data: null, text: null };
-            
             const supportedExts = ['.pdf','.docx','.pptx','.xlsx','.xls','.txt','.md','.csv','.jpg','.png'];
             const ext = "." + file.name.split('.').pop().toLowerCase();
             
@@ -858,8 +866,9 @@
             generatePptBtn.classList.add('opacity-50');
             generateRfiBtn.classList.add('opacity-50');
             
-            // Mode Badge & Button Highlight
+            // Highlight Logic
             if (selectedTemplate === 'rfi') {
+                downloadXlsBtn.disabled = true;
                 modeBadge.innerText = "Mode: RFI (Excel)";
                 modeBadge.className = "px-2 py-1 text-xs font-bold rounded bg-green-100 text-green-700";
             } else if (mode === 'WORD') {

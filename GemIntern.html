@@ -32,7 +32,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
         
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; /* 드래그 방지 */ }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; /* 드래그 방지(선택적) */ }
 
         /* Markdown Preview Styles */
         .markdown-preview { user-select: text; /* 결과물은 복사 가능하게 */ }
@@ -76,7 +76,7 @@
         }
     </style>
 </head>
-<!-- Disable Context Menu and F12 -->
+<!-- Disable Context Menu -->
 <body class="text-slate-800 h-screen flex flex-col" oncontextmenu="return false;">
 
     <!-- Header -->
@@ -89,8 +89,8 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v2.9</span>
-            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Reorganized Layout</span>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v3.0</span>
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Smart Format</span>
         </div>
     </header>
 
@@ -144,7 +144,7 @@
                 <h3 class="text-xs font-bold text-blue-800 mb-1">💡 작성 가이드</h3>
                 <div class="text-xs text-blue-700 space-y-2 mt-2">
                     <p><strong>1. 약식 투자검토:</strong> 5pg 내외 요약 보고서.</p>
-                    <p><strong>2. RFI 작성:</strong> 질문을 입력하면 전문가 관점의 실사 자료 요청 목록(Excel) 생성.</p>
+                    <p><strong>2. RFI 작성:</strong> 질문과 보유 자료 목록을 바탕으로 추가 요청 리스트 생성.</p>
                 </div>
             </div>
 
@@ -177,6 +177,7 @@
                                 <option value="custom">6. 직접 입력 (자동 구조화)</option>
                             </select>
                         </div>
+                        <!-- Updated: resize-y to allow vertical resizing -->
                         <textarea id="structure-input" class="w-full h-48 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y font-mono text-sm shadow-sm transition-all duration-300" placeholder="템플릿을 선택하거나 직접 구조를 입력하세요."></textarea>
                     </div>
 
@@ -356,7 +357,7 @@
         const modelSelect = document.getElementById('model-select');
         const structureInput = document.getElementById('structure-input');
         const contextInput = document.getElementById('context-input');
-        const contextLabel = document.getElementById('context-label'); // Label for Badge
+        const contextLabel = document.getElementById('context-label');
         const templateSelect = document.getElementById('template-select');
         const diagramToggle = document.getElementById('diagram-toggle');
         const thinkingLevelContainer = document.getElementById('thinking-level-container');
@@ -463,29 +464,22 @@
 
         // --- Template Selection & UI Update ---
         function updateUIForTemplate(val) {
-            // Default: Standard Document Mode
+            // Reset common UI
+            formatRefLabel.innerText = "서식 참고 (Format Ref)";
+            formatRefText.innerText = "기존 보고서 샘플 드래그 & 드롭";
+            standardButtons.classList.remove('hidden');
+            rfiButtons.classList.add('hidden');
             folderIndexerSection.classList.add('hidden'); 
             existingRfiSection.classList.add('hidden'); 
             structureInput.classList.replace('h-32', 'h-48'); 
             structureInput.disabled = false;
             
-            standardButtons.classList.remove('hidden');
-            rfiButtons.classList.add('hidden');
-            
-            // Default Numbering (Normal Mode)
-            rawDataBadge.textContent = "2";
-            contextBadge.textContent = "3";
-            formatRefBadge.textContent = "4";
-            
-            // Labels & Placeholders
-            formatRefLabel.innerText = "서식 참고 (Format Ref)";
-            formatRefText.innerText = "기존 보고서 샘플 드래그 & 드롭";
-            contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="context-badge">3</span> 대상 기업 및 맥락 (Context)`;
-            
-            // Export Buttons
+            // Reset buttons
             downloadDocxBtn.classList.remove('hidden');
             downloadPptBtn.classList.remove('hidden');
             downloadXlsBtn.classList.add('hidden');
+            copyBtn.classList.remove('hidden'); // Copy is always good
+            
             iconDoc.classList.remove('hidden');
             iconPpt.classList.remove('hidden');
             iconXls.classList.add('hidden');
@@ -493,23 +487,22 @@
             if (val === 'custom') {
                 structureInput.value = '';
                 structureInput.placeholder = "내용을 비워두면 AI가 제공된 자료를 분석하여 적절한 목차를 스스로 생성합니다.";
+                structureInput.disabled = false;
+                contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span> 대상 기업 및 맥락 (Context)`;
                 contextInput.placeholder = "예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등...";
                 
             } else if (val === 'rfi') {
                 structureInput.value = templates['rfi'];
                 structureInput.disabled = true; 
                 
-                // RFI UI Changes
+                // RFI UI Specifics
                 folderIndexerSection.classList.remove('hidden'); 
                 existingRfiSection.classList.remove('hidden'); 
                 structureInput.classList.replace('h-48', 'h-24'); 
 
                 // RFI Numbering
-                // 1. Template (Fixed)
-                // 2. Folder Scan
                 rawDataBadge.textContent = "3";
                 contextBadge.textContent = "4";
-                // 5 is Existing RFI (Label hardcoded in HTML for this section)
                 formatRefBadge.textContent = "6";
 
                 contextLabel.innerHTML = `<span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">4</span> 추가 질문 및 확인 사항 (Questions)`;
@@ -521,6 +514,7 @@
                 standardButtons.classList.add('hidden');
                 rfiButtons.classList.remove('hidden');
 
+                // Toggle Export Buttons for RFI
                 downloadDocxBtn.classList.add('hidden');
                 downloadPptBtn.classList.add('hidden');
                 downloadXlsBtn.classList.remove('hidden');
@@ -531,6 +525,14 @@
 
             } else {
                 structureInput.value = templates[val];
+                structureInput.disabled = false;
+                
+                // Normal Mode Numbering
+                rawDataBadge.textContent = "2";
+                contextBadge.textContent = "3";
+                formatRefBadge.textContent = "4";
+                
+                contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="context-badge">3</span> 대상 기업 및 맥락 (Context)`;
                 contextInput.placeholder = "예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등...";
             }
         }
@@ -807,7 +809,7 @@
             return newText;
         }
 
-        // --- Copy to Clipboard ---
+        // --- Copy to Clipboard with Formatting ---
         copyHtmlBtn.addEventListener('click', () => {
             if (!generatedText) return;
             const htmlContent = markdownOutput.innerHTML;
@@ -866,9 +868,7 @@
             generatePptBtn.classList.add('opacity-50');
             generateRfiBtn.classList.add('opacity-50');
             
-            // Highlight Logic
             if (selectedTemplate === 'rfi') {
-                downloadXlsBtn.disabled = true;
                 modeBadge.innerText = "Mode: RFI (Excel)";
                 modeBadge.className = "px-2 py-1 text-xs font-bold rounded bg-green-100 text-green-700";
             } else if (mode === 'WORD') {
@@ -956,11 +956,8 @@
                         uploadedDataFiles.forEach(f => f.text ? promptParts.push({text: f.text}) : promptParts.push({inlineData: {mimeType: f.mimeType, data: f.data}}));
                     }
 
-                    const generationConfig = {
-                        maxOutputTokens: 65536,
-                        temperature: 0.2
-                    };
-                    
+                    // *** maxOutputTokens INCREASED to prevent truncation ***
+                    const generationConfig = { maxOutputTokens: 65536, temperature: 0.2 };
                     if (modelName.includes('gemini-3')) {
                         promptParts[0].text = `[System: Thinking Level ${thinkingLevel.toUpperCase()}]\n` + promptParts[0].text;
                     }
@@ -1059,6 +1056,7 @@
                             uploadedFormatFiles.forEach(f => f.text ? promptParts.push({text: f.text}) : promptParts.push({inlineData: {mimeType: f.mimeType, data: f.data}}));
                         }
 
+                        // *** maxOutputTokens INCREASED to prevent truncation ***
                         const generationConfig = { maxOutputTokens: 65536, temperature: 0.7 };
                         if (modelName.includes('gemini-3')) {
                             promptParts[0].text = `[System: Thinking Level ${thinkingLevel.toUpperCase()}]\n` + promptParts[0].text;
@@ -1146,7 +1144,106 @@
 
         downloadPptBtn.addEventListener('click', async () => { /* ... PPT Logic ... */ if (!generatedText) return; const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_16x9'; pptx.defineSlideMaster({ title: 'MASTER_SLIDE', background: { color: 'FFFFFF' }, objects: [ { rect: { x: 0, y: 0, w: '100%', h: 0.75, fill: { color: '1E3A8A' } } }, { text: { text: 'Gemini Report', options: { x: 0.5, y: 0.15, w: 9, color: 'FFFFFF', fontSize: 14 } } }, { text: { text: new Date().toLocaleDateString(), options: { x: 10.5, y: 0.15, w: 2.5, color: 'FFFFFF', fontSize: 12, align: 'right' } } } ] }); const lines = generatedText.split('\n'); let currentSlide = null; let yPos = 1.0; function addText(text, opts = {}) { if (!currentSlide) createSlide("개요"); currentSlide.addText(text, { x: 0.5, y: yPos, w: 12.3, fontSize: 14, color: '333333', fontFace: '맑은 고딕', ...opts }); yPos += (opts.h || 0.4); } function createSlide(title) { currentSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' }); currentSlide.title = title; currentSlide.addText(title, { x: 0.5, y: 0.2, w: 12, h: 0.5, fontSize: 24, bold: true, color: 'FFFFFF', fontFace: '맑은 고딕' }); yPos = 1.0; } let tableRows = []; let inTable = false; for (let i = 0; i < lines.length; i++) { let line = lines[i].trim(); if (line.startsWith('#')) { createSlide(line.replace(/^#+\s*/, '')); continue; } if (line.startsWith('![') && line.includes('](data:image')) { const match = line.match(/\((data:image\/[^;]+;base64,[^)]+)\)/); if (match && match[1]) { if (!currentSlide) createSlide("도식화"); currentSlide.addImage({ data: match[1], x: 2, y: yPos, w: 6, h: 4 }); yPos += 4.2; } continue; } if (line.startsWith('|')) { if (line.includes('---')) continue; const cells = line.split('|').filter((c, idx, arr) => idx > 0 && idx < arr.length - 1).map(c => c.trim().replace(/\*\*/g,'')); const rowObj = cells.map((cellText, idx) => { return { text: cellText, options: { align: idx === 0 ? 'left' : 'right', fontFace: '맑은 고딕', fontSize: 10 } }; }); tableRows.push(rowObj); inTable = true; continue; } else if (inTable) { if (tableRows.length > 0) { if (!currentSlide) createSlide("데이터 표"); currentSlide.addTable(tableRows, { x: 0.5, y: yPos, w: 12.3, border: { pt: 1, color: 'CCCCCC' }, fill: { color: 'F9FAFB' }, autoPage: true, headFill: { color: 'E2E8F0' }, headBold: true, headColor: '1E293B' }); yPos += (tableRows.length * 0.4) + 0.2; } inTable = false; tableRows = []; } if (line.toLowerCase().startsWith('source') || line.startsWith('> Source')) { addText(line.replace(/^>\s*/, ''), { fontSize: 9, color: '64748B', h: 0.3 }); continue; } const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)/); if (listMatch) { const indentLevel = Math.floor(listMatch[1].length / 2); const textContent = listMatch[3].replace(/\*\*/g, ''); addText(textContent, { bullet: true, indentLevel: indentLevel, h: 0.4, breakLine: true }); } else if (line.length > 0) { addText(line.replace(/\*\*/g, ''), { h: 0.4, breakLine: true }); } } if (inTable && tableRows.length) { if(!currentSlide) createSlide("Appendix"); currentSlide.addTable(tableRows, { x: 0.5, y: yPos, w: 12.3, fontSize: 10, border: {pt:1}, autoPage:true }); } pptx.writeFile({ fileName: 'Gemini_IM.pptx' }); });
         
-        downloadDocxBtn.addEventListener('click', async () => { /* ... Previous Docx Logic ... */ if (!generatedText) return; const lines = generatedText.split('\n'); const docChildren = []; function parseRuns(txt) { return txt.split(/(\*\*.*?\*\*)/).map(p => { if(p.startsWith('**')) return new docx.TextRun({text:p.slice(2,-2), bold:true}); return new docx.TextRun({text:p}); }); } let tRows = [], inT = false; for(let line of lines) { line = line.trimRight(); const trimmedLine = line.trim(); if (trimmedLine.startsWith('![') && trimmedLine.includes('](data:image')) { const match = trimmedLine.match(/\((data:image\/[^;]+;base64,[^)]+)\)/); if (match && match[1]) { try { const imageBlob = await fetch(match[1]).then(r => r.blob()); docChildren.push(new docx.Paragraph({ children: [ new docx.ImageRun({ data: await imageBlob.arrayBuffer(), transformation: { width: 400, height: 300 } }) ], alignment: docx.AlignmentType.CENTER, spacing: { after: 200 } })); } catch(e) { console.error("Img fail", e); } } continue; } if(trimmedLine.startsWith('|')) { if(trimmedLine.includes('---')) continue; inT = true; tRows.push(trimmedLine.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim())); } else { if(inT && tRows.length) { docChildren.push(new docx.Table({ rows: tRows.map(r => new docx.TableRow({ children: r.map((c, idx) => new docx.TableCell({ children:[new docx.Paragraph({ children:parseRuns(c), alignment: idx === 0 ? docx.AlignmentType.LEFT : docx.AlignmentType.RIGHT })], borders:{top:{style:'single',size:1},bottom:{style:'single',size:1},left:{style:'single',size:1},right:{style:'single',size:1}} })) })), width: {size:100, type:'pct'} })); tRows = []; inT = false; docChildren.push(new docx.Paragraph({text: ""})); } const headerMatch = line.match(/^(#{1,6})\s+(.*)/); if (headerMatch) { const level = headerMatch[1].length; const text = headerMatch[2]; let headingLevel = docx.HeadingLevel.HEADING_1; if (level === 2) headingLevel = docx.HeadingLevel.HEADING_2; if (level === 3) headingLevel = docx.HeadingLevel.HEADING_3; docChildren.push(new docx.Paragraph({ children:[new docx.TextRun({text: text, bold:true})], heading: headingLevel, spacing:{before:400,after:200} })); } else if(trimmedLine.toLowerCase().startsWith('source') || trimmedLine.startsWith('> Source')) { docChildren.push(new docx.Paragraph({ text:trimmedLine.replace(/^>\s*/,''), alignment: docx.AlignmentType.RIGHT, style: "Normal" })); } else { const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)/); if (listMatch) { const indentLevel = Math.floor(listMatch[1].length / 2); const textContent = listMatch[3]; docChildren.push(new docx.Paragraph({ children: parseRuns(textContent), bullet: { level: indentLevel } })); } else if(trimmedLine) { docChildren.push(new docx.Paragraph({children:parseRuns(trimmedLine)})); } } } } if(inT && tRows.length) { docChildren.push(new docx.Table({ rows: tRows.map(r => new docx.TableRow({ children: r.map((c, idx) => new docx.TableCell({ children:[new docx.Paragraph({ children:parseRuns(c), alignment: idx === 0 ? docx.AlignmentType.LEFT : docx.AlignmentType.RIGHT })], borders:{top:{style:'single',size:1},bottom:{style:'single',size:1},left:{style:'single',size:1},right:{style:'single',size:1}} })) })), width: {size:100, type:'pct'} })); } const doc = new docx.Document({ sections: [{children: docChildren}] }); saveAs(await docx.Packer.toBlob(doc), "Gemini_Report.docx"); });
+        downloadDocxBtn.addEventListener('click', async () => { 
+            if (!generatedText) return; 
+            
+            // Filename Generation
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0,10).replace(/-/g,"");
+            const timeStr = now.toTimeString().slice(0,5).replace(":","");
+            const fileName = `Investment_Review_${dateStr}_${timeStr}.docx`;
+
+            const lines = generatedText.split('\n'); 
+            const docChildren = []; 
+            function parseRuns(txt) { return txt.split(/(\*\*.*?\*\*)/).map(p => { if(p.startsWith('**')) return new docx.TextRun({text:p.slice(2,-2), bold:true}); return new docx.TextRun({text:p}); }); } 
+            
+            let tRows = [], inT = false; 
+            
+            for(let line of lines) { 
+                line = line.trimRight(); 
+                const trimmedLine = line.trim(); 
+                
+                if (trimmedLine.startsWith('![') && trimmedLine.includes('](data:image')) { 
+                    const match = trimmedLine.match(/\((data:image\/[^;]+;base64,[^)]+)\)/); 
+                    if (match && match[1]) { 
+                        try { 
+                            const imageBlob = await fetch(match[1]).then(r => r.blob()); 
+                            docChildren.push(new docx.Paragraph({ children: [ new docx.ImageRun({ data: await imageBlob.arrayBuffer(), transformation: { width: 400, height: 300 } }) ], alignment: docx.AlignmentType.CENTER, spacing: { after: 200 } })); 
+                        } catch(e) { console.error("Img fail", e); } 
+                    } 
+                    continue; 
+                } 
+                
+                if(trimmedLine.startsWith('|')) { 
+                    if(trimmedLine.includes('---')) continue; 
+                    inT = true; 
+                    tRows.push(trimmedLine.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim())); 
+                } else { 
+                    if(inT && tRows.length) { 
+                        docChildren.push(new docx.Table({ 
+                            rows: tRows.map(r => new docx.TableRow({ 
+                                children: r.map((c, idx) => new docx.TableCell({ 
+                                    children:[new docx.Paragraph({ 
+                                        children:parseRuns(c), 
+                                        alignment: idx === 0 ? docx.AlignmentType.LEFT : docx.AlignmentType.RIGHT 
+                                    })], 
+                                    borders:{top:{style:'single',size:1},bottom:{style:'single',size:1},left:{style:'single',size:1},right:{style:'single',size:1}} 
+                                })) 
+                            })), 
+                            width: {size:100, type:'pct'} 
+                        })); 
+                        tRows = []; inT = false; 
+                        docChildren.push(new docx.Paragraph({text: ""})); 
+                    } 
+
+                    const headerMatch = line.match(/^(#{1,6})\s+(.*)/); 
+                    if (headerMatch) { 
+                        const level = headerMatch[1].length; 
+                        const text = headerMatch[2]; 
+                        let headingLevel = docx.HeadingLevel.HEADING_1; 
+                        if (level === 2) headingLevel = docx.HeadingLevel.HEADING_2; 
+                        if (level === 3) headingLevel = docx.HeadingLevel.HEADING_3; 
+                        docChildren.push(new docx.Paragraph({ 
+                            text: text, // Use text prop directly for simplicity or keep children
+                            heading: headingLevel 
+                        })); 
+                    } 
+                    // Source Handling (Right Align, No List)
+                    else if(trimmedLine.toLowerCase().startsWith('source') || trimmedLine.startsWith('> Source')) { 
+                        docChildren.push(new docx.Paragraph({ 
+                            text:trimmedLine.replace(/^>\s*/,''), 
+                            alignment: docx.AlignmentType.RIGHT, 
+                            style: "Normal",
+                            indent: { left: 0 } 
+                        })); 
+                    } 
+                    else { 
+                        const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)/); 
+                        if (listMatch) { 
+                            // Adjusted Indentation Logic: 4 spaces = 1 level
+                            const indentLevel = Math.floor(listMatch[1].length / 4); 
+                            const textContent = listMatch[3]; 
+                            docChildren.push(new docx.Paragraph({ children: parseRuns(textContent), bullet: { level: indentLevel } })); 
+                        } else if(trimmedLine) { 
+                            docChildren.push(new docx.Paragraph({children:parseRuns(trimmedLine)})); 
+                        } 
+                    } 
+                } 
+            } 
+            if(inT && tRows.length) { 
+                docChildren.push(new docx.Table({ 
+                    rows: tRows.map(r => new docx.TableRow({ 
+                        children: r.map((c, idx) => new docx.TableCell({ 
+                            children:[new docx.Paragraph({ children:parseRuns(c), alignment: idx === 0 ? docx.AlignmentType.LEFT : docx.AlignmentType.RIGHT })], 
+                            borders:{top:{style:'single',size:1},bottom:{style:'single',size:1},left:{style:'single',size:1},right:{style:'single',size:1}} 
+                        })) 
+                    })), 
+                    width: {size:100, type:'pct'} 
+                })); 
+            } 
+            const doc = new docx.Document({ sections: [{children: docChildren}] }); 
+            saveAs(await docx.Packer.toBlob(doc), fileName); 
+        });
     </script>
 </body>
 </html>

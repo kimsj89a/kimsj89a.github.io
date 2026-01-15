@@ -33,8 +33,9 @@
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Header -->
         <header class="text-center mb-10">
-            <h1 class="text-3xl font-bold text-blue-700 mb-2">
-                <i class="fa-solid fa-layer-group mr-2"></i>AI 재무제표 통합기 Pro
+            <h1 class="text-3xl font-bold text-blue-700 mb-2 flex items-center justify-center gap-3">
+                <span><i class="fa-solid fa-layer-group mr-2"></i>AI 재무제표 통합기 Pro</span>
+                <span class="text-sm font-medium bg-blue-100 text-blue-600 px-2.5 py-0.5 rounded-full border border-blue-200">v1.2</span>
             </h1>
             <p class="text-gray-600">
                 행 제한 없이 <span class="text-red-500 font-bold">모든 데이터</span>를 분석합니다.<br>
@@ -88,14 +89,30 @@
         </div>
 
         <!-- Result Section -->
-        <div id="resultSection" class="hidden space-y-8">
-            <div class="flex justify-between items-center bg-yellow-50 p-4 rounded-lg border border-yellow-200">
-                <div class="text-sm text-yellow-800">
-                    <i class="fa-solid fa-triangle-exclamation mr-2"></i>
-                    결과가 너무 길 경우 일부가 잘릴 수 있습니다. 이 경우 API 모델의 "Output Token Limit" 때문입니다.
+        <div id="resultSection" class="hidden space-y-6">
+            <!-- Toolbar: Unit Selection & Download -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
+                
+                <!-- Unit Selection -->
+                <div class="flex items-center gap-2">
+                    <span class="text-sm font-semibold text-gray-700 mr-2"><i class="fa-solid fa-scale-balanced mr-1"></i>표시 단위:</span>
+                    <div class="inline-flex bg-gray-100 rounded-lg p-1">
+                        <button onclick="setUnit(1)" id="btn-unit-1" class="unit-btn px-3 py-1.5 text-sm rounded-md font-medium transition bg-white text-blue-700 shadow-sm">원</button>
+                        <button onclick="setUnit(1000)" id="btn-unit-1000" class="unit-btn px-3 py-1.5 text-sm rounded-md font-medium text-gray-600 hover:bg-gray-200 transition">천원</button>
+                        <button onclick="setUnit(1000000)" id="btn-unit-1000000" class="unit-btn px-3 py-1.5 text-sm rounded-md font-medium text-gray-600 hover:bg-gray-200 transition">백만원</button>
+                        <button onclick="setUnit(100000000)" id="btn-unit-100000000" class="unit-btn px-3 py-1.5 text-sm rounded-md font-medium text-gray-600 hover:bg-gray-200 transition">억원</button>
+                    </div>
                 </div>
-                <button onclick="downloadExcel()" class="bg-green-600 text-white px-5 py-2.5 rounded-lg hover:bg-green-700 font-medium shadow-sm transition flex items-center">
-                    <i class="fa-solid fa-file-csv mr-2"></i>통합 엑셀 다운로드
+
+                <!-- Warning Message -->
+                <div class="hidden md:block text-xs text-yellow-600 bg-yellow-50 px-3 py-1 rounded border border-yellow-200">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i>
+                    결과가 잘릴 경우 'Output Token Limit' 때문일 수 있습니다.
+                </div>
+
+                <!-- Download Button -->
+                <button onclick="downloadExcel()" class="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 font-medium shadow-sm transition flex items-center">
+                    <i class="fa-solid fa-file-excel mr-2"></i>템플릿 그대로 엑셀 저장
                 </button>
             </div>
             
@@ -109,6 +126,7 @@
     <script>
         let uploadedFilesData = [];
         let mergedData = []; 
+        let currentUnit = 1; // Default Unit: 1 (Won)
 
         // --- UI Interactions ---
         const dropZone = document.getElementById('dropZone');
@@ -132,6 +150,42 @@
             input.type = input.type === 'password' ? 'text' : 'password';
             icon.classList.toggle('fa-eye');
             icon.classList.toggle('fa-eye-slash');
+        }
+
+        // --- Unit Handling ---
+        function setUnit(unit) {
+            currentUnit = unit;
+            
+            // Update UI Buttons
+            document.querySelectorAll('.unit-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-blue-700', 'shadow-sm');
+                btn.classList.add('text-gray-600', 'hover:bg-gray-200');
+            });
+            
+            const activeBtn = document.getElementById(`btn-unit-${unit}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('text-gray-600', 'hover:bg-gray-200');
+                activeBtn.classList.add('bg-white', 'text-blue-700', 'shadow-sm');
+            }
+
+            // Re-render
+            if (mergedData.length > 0) {
+                renderTables(mergedData);
+            }
+        }
+
+        function formatNumber(value) {
+            if (value === undefined || value === null || value === "") return "-";
+            if (typeof value !== 'number') return value;
+            
+            const converted = value / currentUnit;
+            
+            // 소수점 처리: 원 단위는 정수, 나머지는 소수점 1~2자리
+            const options = { 
+                maximumFractionDigits: currentUnit === 1 ? 0 : 2,
+                minimumFractionDigits: currentUnit === 1 ? 0 : 0
+            };
+            return converted.toLocaleString(undefined, options);
         }
 
         // --- File Handling ---
@@ -180,7 +234,6 @@
                         const sheetsData = {};
                         workbook.SheetNames.forEach(sheetName => {
                             const worksheet = workbook.Sheets[sheetName];
-                            // defval: "" ensures empty cells are included as empty strings, preserving structure
                             const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
                             if (json.length > 0) {
                                 sheetsData[sheetName] = json;
@@ -209,12 +262,10 @@
             processBtn.disabled = true;
 
             try {
-                // Prepare context: Include ALL rows from ALL sheets
-                // REMOVED .slice(0, 200) to ensure NO DATA LOSS
                 const dataContext = uploadedFilesData.map(f => {
                     let fileStr = `[파일: ${f.filename}]\n`;
                     for (const [sheetName, rows] of Object.entries(f.sheets)) {
-                        const snippet = JSON.stringify(rows); // Full data
+                        const snippet = JSON.stringify(rows); 
                         fileStr += ` - 시트명: ${sheetName}\n   데이터: ${snippet}\n`;
                     }
                     return fileStr;
@@ -252,7 +303,6 @@
                     ]
                 `;
 
-                // Using gemini-2.5-flash-preview-09-2025 for large context window and better reasoning
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -263,7 +313,6 @@
                         generationConfig: {
                             temperature: 0,
                             responseMimeType: "application/json"
-                            // maxOutputTokens could be increased if the API supports it in this env, default is usually sufficient for summary tables
                         }
                     })
                 });
@@ -277,7 +326,6 @@
                 
                 if (!generatedText) throw new Error("AI 응답이 비어있습니다. 입력 데이터가 너무 많아 처리에 실패했을 수 있습니다.");
 
-                // Cleanup
                 generatedText = generatedText.replace(/```json/g, '').replace(/```/g, '').trim();
 
                 mergedData = JSON.parse(generatedText);
@@ -303,27 +351,24 @@
                 return;
             }
 
-            // 1. Group by Category
-            const groups = {};
-            data.forEach(row => {
-                const cat = row.category || '기타';
-                if (!groups[cat]) groups[cat] = [];
-                groups[cat].push(row);
-            });
+            const groups = groupBy(data, 'category');
 
-            // 2. Create Table for each group
             Object.keys(groups).forEach(category => {
                 const groupData = groups[category];
                 
                 const section = document.createElement('div');
                 section.className = 'bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden';
                 
+                let unitText = currentUnit === 1 ? "(단위: 원)" : 
+                               currentUnit === 1000 ? "(단위: 천원)" : 
+                               currentUnit === 1000000 ? "(단위: 백만원)" : "(단위: 억원)";
+
                 section.innerHTML = `
-                    <div class="bg-blue-50 px-6 py-4 border-b border-blue-100">
+                    <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 flex justify-between items-center">
                         <h3 class="font-bold text-lg text-blue-900 flex items-center">
                             <i class="fa-solid fa-list-check mr-2"></i>${category}
-                            <span class="ml-2 text-xs font-normal text-blue-600 bg-blue-100 px-2 py-1 rounded-full">${groupData.length}개 계정</span>
                         </h3>
+                        <span class="text-xs text-blue-600 font-medium">${unitText}</span>
                     </div>
                 `;
 
@@ -332,14 +377,7 @@
                 const table = document.createElement('table');
                 table.className = 'w-full text-sm text-left text-gray-600 border-collapse';
 
-                // Columns
-                let yearKeys = new Set();
-                groupData.forEach(r => {
-                    Object.keys(r).forEach(k => {
-                        if (k !== 'account' && k !== 'category' && k !== 'level') yearKeys.add(k);
-                    });
-                });
-                const years = Array.from(yearKeys).sort();
+                const years = getYearColumns(groupData);
 
                 let theadHtml = `
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50">
@@ -372,9 +410,7 @@
                            </td>`;
 
                     years.forEach(y => {
-                        let val = row[y];
-                        if (val === undefined || val === null || val === "") val = "-";
-                        if (typeof val === 'number') val = val.toLocaleString();
+                        let val = formatNumber(row[y]);
                         tr += `<td class="px-6 py-3 text-right font-mono tracking-tight">${val}</td>`;
                     });
                     tr += '</tr>';
@@ -390,17 +426,89 @@
             document.getElementById('resultSection').classList.remove('hidden');
         }
 
-        // --- Export ---
+        // --- Helper Functions ---
+        function groupBy(array, key) {
+            return array.reduce((result, currentValue) => {
+                const groupKey = currentValue[key] || '기타';
+                (result[groupKey] = result[groupKey] || []).push(currentValue);
+                return result;
+            }, {});
+        }
+
+        function getYearColumns(data) {
+            let yearKeys = new Set();
+            data.forEach(r => {
+                Object.keys(r).forEach(k => {
+                    if (k !== 'account' && k !== 'category' && k !== 'level') yearKeys.add(k);
+                });
+            });
+            return Array.from(yearKeys).sort();
+        }
+
+        // --- Export to Excel (Template Preserved) ---
         function downloadExcel() {
             if (mergedData.length === 0) {
                 alert("다운로드할 데이터가 없습니다.");
                 return;
             }
-            
-            const ws = XLSX.utils.json_to_sheet(mergedData);
+
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Integrated_Financials");
-            XLSX.writeFile(wb, "통합_재무제표_Full.xlsx");
+            const groups = groupBy(mergedData, 'category');
+
+            // Create a sheet for each category
+            Object.keys(groups).forEach(category => {
+                const groupData = groups[category];
+                const years = getYearColumns(groupData);
+
+                // Build data array for SheetJS
+                // Header Row
+                let wsData = [
+                    ["계정 과목", ...years] // Header
+                ];
+
+                // Data Rows with Indentation
+                groupData.forEach(row => {
+                    const level = row.level || 3;
+                    // Simulate indentation with spaces for Excel
+                    const indent = "    ".repeat(level - 1); 
+                    const accountName = indent + row.account;
+                    
+                    let rowData = [accountName];
+                    years.forEach(y => {
+                        // Apply current unit conversion for download too
+                        let val = row[y];
+                        if (typeof val === 'number') {
+                            // Round to appropriate decimal places based on unit
+                            val = val / currentUnit;
+                            if (currentUnit > 1) {
+                                val = parseFloat(val.toFixed(2));
+                            } else {
+                                val = Math.round(val);
+                            }
+                        }
+                        rowData.push(val);
+                    });
+                    wsData.push(rowData);
+                });
+
+                const ws = XLSX.utils.aoa_to_sheet(wsData);
+                
+                // Set Column Widths
+                const wscols = [{wch: 40}]; // Account name column width
+                years.forEach(() => wscols.push({wch: 15})); // Year columns
+                ws['!cols'] = wscols;
+
+                // Sanitize sheet name (Excel limit 31 chars, no special chars)
+                let safeSheetName = category.replace(/[\\/?*[\]]/g, "").substring(0, 30) || "Sheet";
+                XLSX.utils.book_append_sheet(wb, ws, safeSheetName);
+            });
+
+            // Filename with Unit
+            let unitName = currentUnit === 1 ? "원" : 
+                           currentUnit === 1000 ? "천원" : 
+                           currentUnit === 1000000 ? "백만원" : "억원";
+            
+            XLSX.writeFile(wb, `통합_재무제표(${unitName}단위).xlsx`);
         }
     </script>
 </body>

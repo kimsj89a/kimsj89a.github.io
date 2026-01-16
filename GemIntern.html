@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEM Intern v4.1</title>
+    <title>GEM Intern v4.2</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -91,6 +91,11 @@
         .chevron { transition: transform 0.3s ease; }
         
         /* Collapsed State Classes */
+        .panel-collapsed {
+            width: 3rem !important; /* w-12 */
+            min-width: 3rem !important;
+            flex: none !important;
+        }
         .panel-collapsed .section-content { display: none !important; }
         .panel-collapsed .chevron { transform: rotate(-90deg); }
 
@@ -115,7 +120,7 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.1</span>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.2</span>
             <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Top Layout</span>
         </div>
     </header>
@@ -194,12 +199,12 @@
         
         <!-- Input Column (Left, 50%) -->
         <section id="input-panel" class="flex-1 flex flex-col border-r border-slate-200 bg-white min-w-0 transition-all duration-300 h-auto lg:h-full lg:w-1/2">
-            <div class="section-header px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-white" onclick="togglePanel('input-panel')">
+            <!-- Header without onclick -->
+            <div class="px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-white">
                 <h2 class="header-title text-lg font-bold text-slate-800 flex items-center gap-2">
                     <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-xs">I</span> 
                     입력 (Input)
                 </h2>
-                <span class="chevron text-slate-400">▼</span>
             </div>
 
             <div class="section-content flex-1 flex flex-col overflow-y-auto p-5 pb-20">
@@ -628,6 +633,10 @@
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
             structureDropZone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
         });
+
+        // Add visual feedback for structure dropzone
+        ['dragenter', 'dragover'].forEach(eventName => structureDropZone.addEventListener(eventName, () => structureDropZone.classList.add('drag-over')));
+        ['dragleave', 'drop'].forEach(eventName => structureDropZone.classList.remove('drag-over'));
         
         structureDropZone.addEventListener('drop', (e) => handleStructureFile(e.dataTransfer.files[0]));
         structureFileInput.addEventListener('change', (e) => handleStructureFile(e.target.files[0]));
@@ -654,11 +663,10 @@
                     throw new Error("파일 내용을 읽을 수 없습니다.");
                 }
 
-                // NOTE: We do NOT add this to a separate context array (Format Ref removed)
-                // We just extract the structure to the text area.
-
                 // 2. Call Gemini to Extract Structure
+                // Forced Thinking Level MINIMAL & Gemini 3 Flash Preview
                 const promptText = `
+                [System: Thinking Level MINIMAL]
                 당신은 문서 구조 분석 전문가입니다.
                 제공된 파일의 내용을 분석하여 **문서의 목차(Table of Contents)**와 **핵심 구조**를 Markdown 형식으로 추출하십시오.
                 
@@ -681,7 +689,9 @@
                     parts.push({ inlineData: { mimeType: fileData.mimeType, data: fileData.data } });
                 }
 
-                const modelName = modelSelect.value;
+                // Forced Model
+                const modelName = "gemini-3-flash-preview"; 
+                
                 const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},

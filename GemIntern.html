@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEM Intern</title>
+    <title>GEM Intern v4.1</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,10 +36,10 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
         
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; /* 드래그 방지 */ }
 
         /* Markdown Preview Styles */
-        .markdown-preview { user-select: text; transition: all 0.2s; }
+        .markdown-preview { user-select: text; /* 결과물은 복사 가능하게 */ transition: all 0.2s; }
         .markdown-preview h1 { font-size: 1.8em; font-weight: bold; margin-top: 1.5em; margin-bottom: 0.8em; color: #1e3a8a; border-bottom: 2px solid #e2e8f0; padding-bottom: 0.3em; }
         .markdown-preview h2 { font-size: 1.4em; font-weight: bold; margin-top: 1.2em; margin-bottom: 0.6em; color: #2563eb; }
         .markdown-preview h3 { font-size: 1.1em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: #475569; }
@@ -58,34 +58,55 @@
         .markdown-preview tr:last-child td { border-bottom: none; }
         .markdown-preview tr:hover { background-color: #f8fafc; }
 
-        /* Editable Mode */
-        .markdown-preview[contenteditable="true"] { outline: 2px solid #3b82f6; outline-offset: 4px; border-radius: 4px; background-color: #ffffff; cursor: text; }
+        /* Editable Mode Style */
+        .markdown-preview[contenteditable="true"] {
+            outline: 2px solid #3b82f6;
+            outline-offset: 4px;
+            border-radius: 4px;
+            background-color: #ffffff;
+            cursor: text;
+        }
 
         /* Drag & Drop */
         .drag-over { background-color: #eff6ff !important; border-color: #3b82f6 !important; border-style: solid !important; }
         
-        /* UI Utilities */
+        /* Loader & Progress */
         .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
         .progress-bar-container { width: 100%; background-color: #e2e8f0; border-radius: 9999px; height: 6px; overflow: hidden; margin-top: 10px; }
         .progress-bar { height: 100%; background-color: #3b82f6; width: 0%; transition: width 0.3s ease; }
-        .copyright-footer { font-size: 0.75rem; color: #94a3b8; text-align: center; padding: 10px 0; border-top: 1px solid #e2e8f0; margin-top: auto; background-color: #f8fafc; }
-        
-        /* Collapsible */
+
+        /* Copyright Footer */
+        .copyright-footer {
+            font-size: 0.75rem;
+            color: #94a3b8;
+            text-align: right;
+            padding-right: 1rem;
+        }
+
+        /* Collapsible Transition */
         .section-header { cursor: pointer; user-select: none; white-space: nowrap; }
         .section-header:hover { background-color: #f1f5f9; }
         .chevron { transition: transform 0.3s ease; }
-        .panel-collapsed { width: 3rem !important; min-width: 3rem !important; flex: none !important; }
-        .panel-collapsed .section-content, .panel-collapsed .header-title { display: none !important; }
+        
+        /* Collapsed State Classes */
+        .panel-collapsed .section-content { display: none !important; }
         .panel-collapsed .chevron { transform: rotate(-90deg); }
-        .settings-collapsed .settings-content { display: none; }
-        .settings-collapsed .chevron { transform: rotate(-90deg); }
+
+        /* Custom Scrollbar for textareas */
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #f1f5f9; }
+        textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
     </style>
 </head>
+<!-- Disable Context Menu -->
 <body class="text-slate-800 h-screen flex flex-col" oncontextmenu="return false;">
 
     <!-- Header -->
-    <header class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between shadow-sm z-20 flex-shrink-0">
+    <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm z-20 flex-shrink-0">
         <div class="flex items-center gap-3">
             <span class="text-3xl">💎</span>
             <div>
@@ -94,76 +115,86 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.2</span>
-            <span class="text-xs bg-red-100 text-red-700 px-2 py-1 rounded font-medium">Docx Fix</span>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.1</span>
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Top Layout</span>
         </div>
     </header>
 
-    <!-- Top Settings Panel -->
-    <section id="settings-panel" class="bg-slate-50 border-b border-slate-200 flex-shrink-0 z-10 transition-all duration-300">
-        <div class="section-header px-6 py-2 flex justify-between items-center bg-slate-100 hover:bg-slate-200 transition-colors" onclick="toggleSettings()">
+    <!-- Settings Panel (Moved to Top) -->
+    <section id="settings-panel" class="bg-slate-50 border-b border-slate-200 flex-shrink-0 transition-all duration-300 z-10 shadow-sm">
+        <div class="section-header px-6 py-2 flex justify-between items-center bg-slate-100 hover:bg-slate-200 transition-colors" onclick="togglePanel('settings-panel')">
             <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                ⚙️ 설정 및 가이드 (Settings)
+                ⚙️ 설정 및 가이드 (Settings & Guide)
             </h2>
-            <span id="settings-chevron" class="chevron text-slate-400">▼</span>
+            <span class="chevron text-slate-400">▼</span>
         </div>
         
-        <div id="settings-content" class="settings-content px-6 py-4">
+        <div class="section-content p-5">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- API Key -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">Google API Key</label>
-                    <input type="password" id="api-key" placeholder="API Key 입력" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                <!-- Col 1: API & Model -->
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Google API Key</label>
+                        <input type="password" id="api-key" placeholder="API Key 입력" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">사용할 모델 (Model)</label>
+                        <select id="model-select" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                            <option value="gemini-3-pro-preview" selected>Gemini 3 Pro Preview</option>
+                            <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
+                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                        </select>
+                    </div>
                 </div>
 
-                <!-- Model -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-1">사용할 모델 (Model)</label>
-                    <select id="model-select" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
-                        <option value="gemini-3-pro-preview" selected>Gemini 3 Pro Preview</option>
-                        <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
-                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                    </select>
-                </div>
-
-                <!-- Thinking Level -->
-                <div id="thinking-level-container">
-                    <label class="block text-sm font-medium text-slate-700 mb-1 flex items-center justify-between">
-                        <span>🧠 사고 수준</span>
-                        <span class="text-xs text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded">G3 Only</span>
-                    </label>
-                    <select id="thinking-level" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
-                        <option value="high" selected>High (추론 극대화)</option>
-                        <option value="low">Low (속도 최적화)</option>
-                        <option value="minimal" disabled>Minimal (Flash 전용)</option>
-                    </select>
-                </div>
-
-                <!-- Image & Guide -->
-                <div class="flex flex-col justify-between">
-                    <div class="flex items-center justify-between mb-1 bg-purple-50 p-2 rounded border border-purple-100">
-                        <label class="text-xs font-bold text-purple-900 cursor-pointer" for="diagram-toggle">도식화 이미지 생성</label>
+                <!-- Col 2: Thinking & Diagram -->
+                <div class="space-y-4">
+                    <div id="thinking-level-container">
+                        <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                            <span>🧠 사고 수준 (Thinking)</span>
+                            <span class="text-[10px] text-blue-600 bg-blue-50 px-1 rounded">G3 Only</span>
+                        </label>
+                        <select id="thinking-level" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                            <option value="high" selected>High (추론 깊이 극대화)</option>
+                            <option value="low">Low (지연 시간/비용 최소화)</option>
+                            <option value="minimal" disabled>Minimal (Flash 전용)</option>
+                        </select>
+                    </div>
+                    <div class="bg-purple-50 p-2 rounded-md border border-purple-100 flex items-center justify-between">
+                        <div>
+                            <label class="text-xs font-bold text-purple-900 block">도식화 이미지 생성</label>
+                            <p class="text-[10px] text-purple-700">복잡한 내용의 다이어그램 자동 생성</p>
+                        </div>
                         <input type="checkbox" id="diagram-toggle" class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500">
                     </div>
-                    <div class="text-xs text-blue-700 bg-blue-50 p-2 rounded border border-blue-100 leading-snug">
-                        <strong>Tip:</strong> 1.약식검토(5pg 요약), 2.RFI(질문기반)
+                </div>
+
+                <!-- Col 3: Guide -->
+                <div class="bg-blue-50 p-3 rounded-md border border-blue-100 h-full flex flex-col justify-center">
+                    <h3 class="text-xs font-bold text-blue-800 mb-1">💡 작성 가이드</h3>
+                    <div class="text-[11px] text-blue-700 space-y-1">
+                        <p>• <strong>약식 검토:</strong> 5pg 내외 요약 보고서</p>
+                        <p>• <strong>RFI 작성:</strong> 자료 요청 리스트 생성 (엑셀)</p>
+                        <p>• <strong>서식 참고:</strong> 삭제됨 (구조 추출 기능 사용 권장)</p>
                     </div>
                 </div>
-            </div>
-            
-            <div class="copyright-footer">
-                <p class="font-bold text-slate-400">Powered and Copyright By Jean Kim</p>
+
+                <!-- Col 4: Footer -->
+                <div class="flex flex-col justify-end items-end h-full">
+                     <p class="text-xs text-slate-400 font-medium">Powered by Gemini 3.0</p>
+                     <p class="text-[10px] text-slate-300 mt-1">Copyright By Jean Kim</p>
+                </div>
             </div>
         </div>
     </section>
 
-    <!-- Main Container -->
+    <!-- Main Container: 2-Column Layout -->
     <div class="flex flex-col lg:flex-row flex-1 overflow-hidden h-full relative">
         
-        <!-- Input Column -->
-        <section id="input-panel" class="flex-1 flex flex-col border-r border-slate-200 bg-white min-w-0 lg:min-w-[400px] transition-all duration-300 h-auto lg:h-full">
-            <div class="section-header px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-50 lg:bg-white" onclick="togglePanel('input-panel')">
+        <!-- Input Column (Left, 50%) -->
+        <section id="input-panel" class="flex-1 flex flex-col border-r border-slate-200 bg-white min-w-0 transition-all duration-300 h-auto lg:h-full lg:w-1/2">
+            <div class="section-header px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-white" onclick="togglePanel('input-panel')">
                 <h2 class="header-title text-lg font-bold text-slate-800 flex items-center gap-2">
                     <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-xs">I</span> 
                     입력 (Input)
@@ -171,7 +202,7 @@
                 <span class="chevron text-slate-400">▼</span>
             </div>
 
-            <div class="section-content flex-1 flex flex-col overflow-y-auto p-5">
+            <div class="section-content flex-1 flex flex-col overflow-y-auto p-5 pb-20">
                 <!-- 1. Structure -->
                 <div class="mb-6 flex flex-col transition-all duration-300" id="structure-container">
                     <div class="flex justify-between items-end mb-2">
@@ -194,11 +225,11 @@
                         <input type="file" id="structure-file-input" class="hidden" accept=".pdf,.docx,.txt,.md">
                         <div class="flex items-center justify-center gap-2 text-slate-500">
                             <span class="text-lg group-hover:scale-110 transition-transform">📂</span>
-                            <span class="text-xs font-medium" id="structure-upload-text">서식 파일 업로드 (구조 추출)</span>
+                            <span class="text-xs font-medium" id="structure-upload-text">서식 파일 업로드 (구조만 추출)</span>
                         </div>
                         <div id="structure-loading" class="hidden text-xs text-blue-600 mt-1">
                             <span class="loader w-3 h-3 border-2 border-blue-600 border-t-transparent rounded-full inline-block align-middle mr-1"></span>
-                            분석 중...
+                            구조 분석 중...
                         </div>
                     </div>
 
@@ -209,22 +240,24 @@
                 <div id="folder-indexer-section" class="hidden mb-4 flex-1 flex flex-col min-h-0 w-full border-2 border-dashed border-green-200 rounded-xl bg-green-50 p-4 relative group hover:border-green-400 transition-colors overflow-hidden">
                     <div class="flex items-center justify-between mb-2">
                         <label class="text-sm font-bold text-green-800 flex items-center gap-2">
-                            <span class="text-lg">📁</span> 보유 자료 폴더 스캔 (Folder Scan)
+                            <span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">2</span>
+                            보유 자료 폴더 스캔 (Folder Scan)
                         </label>
                         <span class="text-xs text-green-600 font-medium" id="folder-count">0 files</span>
                     </div>
                     <div class="text-center text-xs text-green-600 mb-2 pointer-events-none">
                         <p>폴더를 이곳에 드래그하세요. 하위 폴더까지 스캔합니다.</p>
-                        <p class="opacity-75 mt-1">(자료는 실제로 서버에 업로드되지 않으며, 파일명 목록만 추출합니다)</p>
+                        <p class="opacity-75 mt-1">(파일명만 추출하여 리스트를 생성합니다)</p>
                     </div>
-                    
+                    <!-- Scanned List -->
                     <div class="flex-1 overflow-y-auto bg-white border border-green-200 rounded-lg p-2 text-xs font-mono text-slate-600 shadow-inner max-h-[150px]" id="scanned-file-list">
                         <p class="text-center text-gray-300 py-4 italic">대기 중...</p>
                     </div>
+                    <!-- Overlay for Drag -->
                     <input type="file" id="folder-input" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" webkitdirectory directory multiple>
                 </div>
 
-                <!-- 2. File Uploads -->
+                <!-- 2. File Uploads (Raw Data) -->
                 <div class="space-y-4 mb-6">
                     <div>
                         <label id="raw-data-label" class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
@@ -235,7 +268,7 @@
                             <input type="file" id="file-input-data" class="hidden" multiple accept=".pdf,.docx,.pptx,.xlsx,.xls,.txt,.md,.csv,.jpg,.png">
                             <div class="flex items-center justify-center gap-2 text-slate-600">
                                 <span class="text-xl">📊</span>
-                                <span class="text-sm font-medium">내용을 분석할 파일 드래그 (IR, 재무제표 등)</span>
+                                <span class="text-sm font-medium">IR 자료, 재무제표 등 파일 드래그</span>
                             </div>
                         </div>
                         <div id="file-list-data" class="mt-2 space-y-1"></div>
@@ -251,7 +284,7 @@
                     <textarea id="context-input" class="w-full h-24 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y text-sm shadow-sm" placeholder="예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등..."></textarea>
                 </div>
 
-                <!-- 4. Existing RFI -->
+                <!-- 5. Existing RFI (Visible only in RFI mode) -->
                 <div id="existing-rfi-section" class="hidden mb-6">
                     <label class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
                         <span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">5</span>
@@ -260,8 +293,11 @@
                     <textarea id="existing-rfi-input" class="w-full h-32 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-y text-sm shadow-sm" placeholder="기존에 작성된 RFI 표가 있다면 이곳에 붙여넣으세요."></textarea>
                 </div>
 
+                <!-- Format Ref Section REMOVED per request v4.0 -->
+
                 <!-- Buttons -->
-                <div class="mt-4 pt-4 border-t border-slate-100">
+                <div class="mt-auto pt-4 border-t border-slate-100">
+                    <!-- Standard Buttons -->
                     <div id="standard-buttons" class="grid grid-cols-2 gap-3">
                         <button id="generate-word-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
                             <span>📄 Word 보고서 생성</span>
@@ -271,6 +307,7 @@
                         </button>
                     </div>
                     
+                    <!-- RFI Button -->
                     <div id="rfi-buttons" class="hidden">
                         <button id="generate-rfi-btn" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md transition-colors flex items-center justify-center gap-2">
                             <span>📋 RFI 생성 (실사 요청 목록)</span>
@@ -280,9 +317,9 @@
             </div>
         </section>
 
-        <!-- Output Column -->
-        <section id="output-panel" class="flex-1 flex flex-col bg-slate-50 min-w-0 lg:min-w-[400px] relative h-auto lg:h-full">
-            <div class="section-header px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-100 lg:bg-white" onclick="togglePanel('output-panel')">
+        <!-- Output Column (Right, 50%) -->
+        <section id="output-panel" class="flex-1 flex flex-col bg-slate-50 min-w-0 transition-all duration-300 h-auto lg:h-full lg:w-1/2">
+            <div class="section-header px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-white" onclick="togglePanel('output-panel')">
                 <div class="flex items-center gap-2">
                     <h2 class="header-title text-lg font-bold text-slate-800 flex items-center gap-2">
                         <span class="bg-green-100 text-green-600 rounded-full w-6 h-6 flex items-center justify-center text-xs">R</span> 
@@ -291,6 +328,7 @@
                     <span id="mode-badge" class="hidden px-2 py-1 text-xs font-bold rounded bg-slate-200 text-slate-600">Ready</span>
                 </div>
                 <div class="flex items-center gap-2">
+                     <!-- Copy & Edit Buttons -->
                      <button id="copy-html-btn" class="bg-white border border-slate-300 hover:bg-slate-50 text-slate-600 text-xs px-2 py-1 rounded shadow-sm flex items-center gap-1 transition-colors" title="서식(표, 굵기) 포함 복사">
                         <span>📋 복사</span>
                     </button>
@@ -302,38 +340,65 @@
             </div>
 
             <div class="section-content flex-1 flex flex-col overflow-hidden relative p-5 h-[500px] lg:h-auto">
+                
                 <div id="result-container" class="bg-white border border-slate-200 rounded-lg p-6 w-full h-full shadow-sm flex flex-col overflow-hidden relative">
+                    <!-- Loading State -->
                     <div id="loading-indicator" class="hidden flex-col items-center justify-center h-full w-full absolute inset-0 bg-white z-20">
                         <div class="loader mb-4"></div>
                         <p id="loading-text" class="text-slate-600 text-sm font-bold mb-2">분석 시작...</p>
                         <p id="loading-subtext" class="text-slate-400 text-xs">전체 문서를 순차적으로 작성합니다.</p>
-                        <div class="w-64 progress-bar-container"><div id="progress-bar" class="progress-bar"></div></div>
-                        <button id="stop-btn" class="mt-8 px-5 py-2 bg-red-50 text-red-600 border border-red-200 rounded-full text-sm font-bold hover:bg-red-100 transition-colors flex items-center gap-2 shadow-sm"><span>🛑</span> 중단 (Stop)</button>
+                        
+                        <!-- Progress Bar -->
+                        <div class="w-64 progress-bar-container">
+                            <div id="progress-bar" class="progress-bar"></div>
+                        </div>
+
+                        <button id="stop-btn" class="mt-8 px-5 py-2 bg-red-50 text-red-600 border border-red-200 rounded-full text-sm font-bold hover:bg-red-100 transition-colors flex items-center gap-2 shadow-sm">
+                            <span>🛑</span> 중단 (Stop)
+                        </button>
                     </div>
+                    
+                    <!-- Empty State -->
                     <div id="empty-state" class="flex flex-col items-center justify-center h-full w-full text-slate-400 absolute inset-0 z-10">
                         <div class="flex gap-4 mb-2">
-                            <span class="text-4xl" id="icon-doc">📄</span><span class="text-4xl text-orange-400" id="icon-ppt">📊</span><span class="text-4xl text-green-600 hidden" id="icon-xls">📉</span>
+                            <span class="text-4xl" id="icon-doc">📄</span>
+                            <span class="text-4xl text-orange-400" id="icon-ppt">📊</span>
+                            <span class="text-4xl text-green-600 hidden" id="icon-xls">📉</span>
                         </div>
                         <p class="text-sm">입력 후 생성 버튼을 누르면<br>결과가 이곳에 표시됩니다.</p>
                     </div>
+
+                    <!-- Markdown Preview Area (Editable) -->
                     <div id="markdown-output" class="markdown-preview flex-1 overflow-y-auto"></div>
                 </div>
 
-                <!-- Refinement -->
+                <!-- Refinement Section -->
                 <div id="refinement-section" class="hidden mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex-shrink-0">
-                    <label class="block text-xs font-bold text-yellow-800 mb-2 flex items-center gap-1"><span>✨</span> 결과물 추가 요청 / 수정 (Refinement)</label>
+                    <label class="block text-xs font-bold text-yellow-800 mb-2 flex items-center gap-1">
+                        <span>✨</span> 결과물 추가 요청 / 수정 (Refinement)
+                    </label>
                     <div class="flex gap-2">
-                        <input type="text" id="refinement-input" class="flex-1 px-3 py-2 border border-yellow-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="예: 경쟁사 비교표를 추가해줘...">
-                        <button id="refine-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold px-4 py-2 rounded shadow-sm transition-colors whitespace-nowrap">추가 반영</button>
+                        <input type="text" id="refinement-input" class="flex-1 px-3 py-2 border border-yellow-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-yellow-500" placeholder="예: 경쟁사 비교표를 추가해줘, 3번 항목을 좀 더 자세히 설명해줘...">
+                        <button id="refine-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-bold px-4 py-2 rounded shadow-sm transition-colors whitespace-nowrap">
+                            추가 반영
+                        </button>
                     </div>
                 </div>
 
-                <!-- Export -->
+                <!-- Export Buttons -->
                 <div class="pt-4 mt-auto border-t border-slate-200 bg-white flex gap-2 flex-shrink-0">
-                    <button id="download-docx-btn" class="flex-1 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" disabled><span>📄 Word 저장</span></button>
-                    <button id="download-ppt-btn" class="flex-1 bg-orange-50 border border-orange-200 hover:bg-orange-100 text-orange-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" disabled><span>📊 PPT 저장</span></button>
-                    <button id="download-xls-btn" class="hidden flex-1 bg-green-50 border border-green-200 hover:bg-green-100 text-green-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm" disabled><span>📉 XLS 저장</span></button>
-                    <button id="copy-btn" class="hidden flex-none bg-gray-50 border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-sm" disabled title="텍스트만 복사"><span>📝</span></button>
+                    <button id="download-docx-btn" class="flex-1 bg-blue-50 border border-blue-200 hover:bg-blue-100 text-blue-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" disabled>
+                        <span>📄 Word 저장</span>
+                    </button>
+                    <button id="download-ppt-btn" class="flex-1 bg-orange-50 border border-orange-200 hover:bg-orange-100 text-orange-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm" disabled>
+                        <span>📊 PPT 저장</span>
+                    </button>
+                    <button id="download-xls-btn" class="hidden flex-1 bg-green-50 border border-green-200 hover:bg-green-100 text-green-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm" disabled>
+                        <span>📉 XLS 저장</span>
+                    </button>
+                    <button id="copy-btn" class="hidden flex-none bg-gray-50 border border-gray-300 hover:bg-gray-100 text-gray-700 font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center shadow-sm" disabled title="텍스트만 복사">
+                        <span>📝</span>
+                    </button>
                 </div>
             </div>
         </section>
@@ -341,10 +406,15 @@
 
     <!-- Application Logic -->
     <script>
-        // ... (All previous logic, plus new robust DOCX handler) ...
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => { if (e.key === 'F12' || (e.ctrlKey && (e.key === 'I' || e.key === 'u'))) e.preventDefault(); });
+        // --- Security: Prevent F12 & Context Menu ---
+        document.addEventListener('contextmenu', event => event.preventDefault());
+        document.addEventListener('keydown', event => {
+            if (event.key === 'F12' || (event.ctrlKey && event.shiftKey && event.key === 'I') || (event.ctrlKey && event.key === 'u')) {
+                event.preventDefault();
+            }
+        });
 
+        // DOM Elements
         const apiKeyInput = document.getElementById('api-key');
         const modelSelect = document.getElementById('model-select');
         const structureInput = document.getElementById('structure-input');
@@ -354,20 +424,32 @@
         const diagramToggle = document.getElementById('diagram-toggle');
         const thinkingLevelContainer = document.getElementById('thinking-level-container');
         const thinkingLevelSelect = document.getElementById('thinking-level');
+        
+        // Folder Indexer Elements
         const folderIndexerSection = document.getElementById('folder-indexer-section');
         const folderInput = document.getElementById('folder-input');
         const scannedFileList = document.getElementById('scanned-file-list');
         const folderCount = document.getElementById('folder-count');
+
+        // New Elements for Split RFI Input
         const existingRfiSection = document.getElementById('existing-rfi-section');
         const existingRfiInput = document.getElementById('existing-rfi-input');
+        
+        // Number Badges elements
         const rawDataBadge = document.getElementById('raw-data-badge');
         const contextBadge = document.getElementById('context-badge');
+
+        // Structure Extraction Elements
         const structureDropZone = document.getElementById('structure-drop-zone');
         const structureFileInput = document.getElementById('structure-file-input');
         const structureUploadText = document.getElementById('structure-upload-text');
         const structureLoading = document.getElementById('structure-loading');
+
+        // Dynamic UI Elements
         const standardButtons = document.getElementById('standard-buttons');
         const rfiButtons = document.getElementById('rfi-buttons');
+        
+        // Buttons
         const generateWordBtn = document.getElementById('generate-word-btn');
         const generatePptBtn = document.getElementById('generate-ppt-btn');
         const generateRfiBtn = document.getElementById('generate-rfi-btn');
@@ -375,10 +457,12 @@
         const downloadDocxBtn = document.getElementById('download-docx-btn');
         const downloadPptBtn = document.getElementById('download-ppt-btn');
         const downloadXlsBtn = document.getElementById('download-xls-btn');
-        const copyHtmlBtn = document.getElementById('copy-html-btn');
+        const copyHtmlBtn = document.getElementById('copy-html-btn'); 
         const copyBtn = document.getElementById('copy-btn');
         const editToggleBtn = document.getElementById('edit-toggle-btn');
         const refineBtn = document.getElementById('refine-btn');
+
+        // UI State Elements
         const resultContainer = document.getElementById('result-container');
         const loadingIndicator = document.getElementById('loading-indicator');
         const loadingText = document.getElementById('loading-text');
@@ -389,299 +473,934 @@
         const refinementSection = document.getElementById('refinement-section');
         const refinementInput = document.getElementById('refinement-input');
         const modeBadge = document.getElementById('mode-badge');
+        
         const iconDoc = document.getElementById('icon-doc');
         const iconPpt = document.getElementById('icon-ppt');
         const iconXls = document.getElementById('icon-xls');
 
+        // File handling vars
         let generatedText = "";
         let uploadedDataFiles = [];
-        let scannedFolderFiles = [];
+        let scannedFolderFiles = []; 
         let abortController = null;
-        let currentMode = null;
+        let currentMode = null; 
         let isEditing = false;
         
+        // Initialize Turndown Service for HTML -> Markdown conversion
         const turndownService = new TurndownService();
         turndownService.use(turndownPluginGfm.gfm);
 
-        // Toggle Panel Logic
+        // --- Toggle Section Logic ---
         window.togglePanel = function(id) {
             const el = document.getElementById(id);
-            el.classList.toggle('panel-collapsed');
-        };
-        
-        window.toggleSettings = function() {
-            const panel = document.getElementById('settings-panel');
-            panel.classList.toggle('settings-collapsed');
+            if (el.classList.contains('panel-collapsed')) {
+                el.classList.remove('panel-collapsed');
+            } else {
+                el.classList.add('panel-collapsed');
+            }
         };
 
-        // --- Logic Blocks (Persistence, Model, Template, Files, API) ---
-        if (localStorage.getItem('gemini_api_key')) apiKeyInput.value = localStorage.getItem('gemini_api_key');
-        apiKeyInput.addEventListener('input', (e) => localStorage.setItem('gemini_api_key', e.target.value));
+        // --- API Key Persistence ---
+        if (localStorage.getItem('gemini_api_key')) {
+            apiKeyInput.value = localStorage.getItem('gemini_api_key');
+        }
+        apiKeyInput.addEventListener('input', (e) => {
+            localStorage.setItem('gemini_api_key', e.target.value);
+        });
 
+        // --- Model Selection Change Logic ---
         modelSelect.addEventListener('change', (e) => {
             const model = e.target.value;
             const minimalOption = thinkingLevelSelect.querySelector('option[value="minimal"]');
+            
             if (model.includes('gemini-3')) {
                 thinkingLevelContainer.classList.remove('hidden');
-                if (model.includes('flash')) { minimalOption.disabled = false; minimalOption.text = "Minimal (초고속)"; }
-                else { minimalOption.disabled = true; minimalOption.text = "Minimal (Flash 전용)"; if (thinkingLevelSelect.value === 'minimal') thinkingLevelSelect.value = 'high'; }
-            } else { thinkingLevelContainer.classList.add('hidden'); }
+                if (model.includes('flash')) {
+                    minimalOption.disabled = false;
+                    minimalOption.text = "Minimal (초고속, 최소 추론)";
+                } else {
+                    minimalOption.disabled = true;
+                    minimalOption.text = "Minimal (Flash 전용)";
+                    if (thinkingLevelSelect.value === 'minimal') {
+                        thinkingLevelSelect.value = 'high';
+                    }
+                }
+            } else {
+                thinkingLevelContainer.classList.add('hidden');
+            }
         });
         modelSelect.dispatchEvent(new Event('change'));
 
+
+        // --- Template Logic ---
         const templates = {
             'simple_review': `# 1. 검토 개요\n   - 검토 배경 및 목적\n   - 대상 기업 요약\n   - 주요 투자 조건\n\n# 2. 회사 현황 (Company Profile)\n   - 설립 및 상장 개요\n   - 주요 사업 현황\n\n# 3. 재무 및 주가 분석\n   - 요약 재무상태 (최근 3년 매출/이익, 자산/부채 현황)\n   - (필요시) 주가 추이 및 거래량 분석\n\n# 4. 주요 동향 및 이슈\n   - 최근 주요 계약\n   - 최근 주요 뉴스\n\n# 5. 종합 의견\n   - 투자 리스크 점검\n   - 최종 검토 의견`,
-            'rfi': `[RFI 작성 모드]`,
-            'investment': `# 1. 투자내용 (Executive Summary)\n   - 투자개요\n   - 투자조건\n\n# 2. 회사현황\n\n# 3. 시장분석\n\n# 4. 사업분석\n\n# 5. 투자 타당성 분석\n\n# 6. 리스크 분석\n\n# 7. 종합의견`,
-            'im': `# 1. Investment Highlights\n# 2. Company Overview\n# 3. Market Opportunity\n# 4. Product & Technology\n# 5. Financial Plan`,
-            'management': `# 1. 운용 개요\n# 2. 포트폴리오 주요 현황\n# 3. 주요 이슈 및 점검 사항\n# 4. 회수(Exit) 현황 및 계획`,
+            'rfi': `[RFI 작성 모드]\n이 모드에서는 문서 구조가 아닌 '궁금한 사항'을 바탕으로 자료 요청 목록을 생성합니다.\n아래 [4. 추가 질문 및 확인 사항] 칸에 확인하고 싶은 리스크나 의문점을 적거나, [5. 기존 RFI]에 표를 붙여넣으세요.`,
+            'investment': `# 1. 투자내용 (Executive Summary)\n   - 투자개요 (딜 구조, 구주/신주, 사이즈)\n   - 투자조건 (Valuation, 금액, 단가)\n   - 주요 투자 조건 (RCPS, 만기, 배당, 상환/전환권, Refixing)\n   - 자금사용계획 (CAPEX, OPEX)\n   - 지분율 변화 (Pre/Post 투자)\n\n# 2. 회사현황 (Company Profile)\n   - 회사개요 (대표, 설립일, 주요사업, 위치)\n   - 재무현황 (최근 3~4년 요약 재무제표, 매출/이익 추이)\n\n# 3. 시장분석 (Market Analysis)\n   - 산업 트렌드 (거시 환경, 기회 요인)\n   - 시장 규모 및 전망 (TAM/SAM/SOM, CAGR)\n\n# 4. 사업분석 (Business Analysis)\n   - 비즈니스 모델 (매출원 Breakdown)\n   - 핵심 경쟁력 (기술, 독점력, 인프라)\n   - 경쟁사 비교 (우위 요소)\n\n# 5. 투자 타당성 분석 (Valuation & Exit)\n   - 인수가액 분석 (Multiples, Peer 비교)\n   - Value-up 방안\n   - 회수(Exit) 시나리오 (IPO/M&A 수익률 분석)\n\n# 6. 리스크 분석 (Risk Factors)\n   - 주요 리스크 (사업/재무/법률)\n   - 대응 방안 (Mitigation Plan)\n\n# 7. 종합의견 (Conclusion)\n   - 투자 포인트 요약\n   - 최종 심사 의견`,
+            'im': `# 1. Investment Highlights\n   - 핵심 투자 포인트\n\n# 2. Company Overview\n   - 기업 소개\n   - 연혁 및 비전\n\n# 3. Market Opportunity\n   - 시장의 문제점 (Pain Point)\n   - 해결책 (Solution)\n\n# 4. Product & Technology\n   - 주요 제품/서비스\n   - 기술 경쟁력\n\n# 5. Financial Plan\n   - 추정 손익계산서\n   - 자금 소요 계획 (Use of Proceeds)`,
+            'management': `# 1. 운용 개요 (Fund Overview)\n   - 펀드 개황\n   - 운용 성과 요약\n\n# 2. 포트폴리오 주요 현황\n   - 피투자기업 실적 요약\n   - 주요 경영 활동\n\n# 3. 주요 이슈 및 점검 사항\n   - Risk 요인 점검\n   - 대응 방안\n\n# 4. 회수(Exit) 현황 및 계획\n   - 회수 실적\n   - 향후 회수 전략`,
             'custom': ''
         };
+
+        // Set Default
         structureInput.value = templates['simple_review'];
 
+        // --- Template Selection & UI Update ---
         function updateUIForTemplate(val) {
-            standardButtons.classList.remove('hidden'); rfiButtons.classList.add('hidden');
-            folderIndexerSection.classList.add('hidden'); existingRfiSection.classList.add('hidden');
-            structureInput.classList.replace('h-32', 'h-48'); structureInput.disabled = false;
-            structureDropZone.classList.remove('hidden');
-            downloadDocxBtn.classList.remove('hidden'); downloadPptBtn.classList.remove('hidden'); downloadXlsBtn.classList.add('hidden');
-            iconDoc.classList.remove('hidden'); iconPpt.classList.remove('hidden'); iconXls.classList.add('hidden');
+            // Reset common UI
+            standardButtons.classList.remove('hidden');
+            rfiButtons.classList.add('hidden');
+            folderIndexerSection.classList.add('hidden'); 
+            existingRfiSection.classList.add('hidden'); 
+            structureInput.classList.replace('h-32', 'h-48'); 
+            structureInput.disabled = false;
+            structureDropZone.classList.remove('hidden'); 
+            
+            // Reset buttons
+            downloadDocxBtn.classList.remove('hidden');
+            downloadPptBtn.classList.remove('hidden');
+            downloadXlsBtn.classList.add('hidden');
+            copyBtn.classList.remove('hidden'); 
+            
+            iconDoc.classList.remove('hidden');
+            iconPpt.classList.remove('hidden');
+            iconXls.classList.add('hidden');
 
             if (val === 'custom') {
-                structureInput.value = ''; structureInput.placeholder = "내용을 비워두면 AI가 자동 생성합니다.";
+                structureInput.value = '';
+                structureInput.placeholder = "내용을 비워두면 AI가 제공된 자료를 분석하여 적절한 목차를 스스로 생성합니다.";
+                structureInput.disabled = false;
                 contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span> 대상 기업 및 맥락 (Context)`;
+                contextInput.placeholder = "예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등...";
+                
             } else if (val === 'rfi') {
-                structureInput.value = templates['rfi']; structureInput.disabled = true; structureDropZone.classList.add('hidden');
-                folderIndexerSection.classList.remove('hidden'); existingRfiSection.classList.remove('hidden');
-                structureInput.classList.replace('h-48', 'h-24');
-                rawDataBadge.textContent = "3"; contextBadge.textContent = "4";
+                structureInput.value = templates['rfi'];
+                structureInput.disabled = true; 
+                structureDropZone.classList.add('hidden'); // Hide drop zone in RFI mode
+                
+                // RFI UI Specifics
+                folderIndexerSection.classList.remove('hidden'); 
+                existingRfiSection.classList.remove('hidden'); 
+                structureInput.classList.replace('h-48', 'h-24'); 
+
+                // RFI Numbering
+                rawDataBadge.textContent = "3";
+                contextBadge.textContent = "4";
+
                 contextLabel.innerHTML = `<span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">4</span> 추가 질문 및 확인 사항 (Questions)`;
-                contextInput.placeholder = "예: 재고가 너무 많이 쌓여있는 것 같은데...";
-                standardButtons.classList.add('hidden'); rfiButtons.classList.remove('hidden');
-                downloadDocxBtn.classList.add('hidden'); downloadPptBtn.classList.add('hidden'); downloadXlsBtn.classList.remove('hidden');
-                iconDoc.classList.add('hidden'); iconPpt.classList.add('hidden'); iconXls.classList.remove('hidden');
+                contextInput.placeholder = "예: 재고가 너무 많이 쌓여있는 것 같은데 확인하고 싶어, 대표이사 횡령 이슈 체크";
+                
+                standardButtons.classList.add('hidden');
+                rfiButtons.classList.remove('hidden');
+
+                // Toggle Export Buttons for RFI
+                downloadDocxBtn.classList.add('hidden');
+                downloadPptBtn.classList.add('hidden');
+                downloadXlsBtn.classList.remove('hidden');
+                
+                iconDoc.classList.add('hidden');
+                iconPpt.classList.add('hidden');
+                iconXls.classList.remove('hidden');
+
             } else {
                 structureInput.value = templates[val];
-                rawDataBadge.textContent = "2"; contextBadge.textContent = "3";
-                contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span> 대상 기업 및 맥락 (Context)`;
+                structureInput.disabled = false;
+                
+                // Normal Mode Numbering
+                rawDataBadge.textContent = "2";
+                contextBadge.textContent = "3";
+                
+                contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="context-badge">3</span> 대상 기업 및 맥락 (Context)`;
+                contextInput.placeholder = "예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등...";
             }
         }
-        templateSelect.addEventListener('change', (e) => updateUIForTemplate(e.target.value));
-        updateUIForTemplate('simple_review');
 
-        // --- File Handling ---
+        templateSelect.addEventListener('change', (e) => {
+            updateUIForTemplate(e.target.value);
+        });
+
+        updateUIForTemplate('simple_review'); // Init
+
+
+        // --- Auto Structure Extraction Logic ---
+        structureDropZone.addEventListener('click', () => structureFileInput.click());
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            structureDropZone.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); });
+        });
+        
+        structureDropZone.addEventListener('drop', (e) => handleStructureFile(e.dataTransfer.files[0]));
+        structureFileInput.addEventListener('change', (e) => handleStructureFile(e.target.files[0]));
+
+        async function handleStructureFile(file) {
+            if (!file) return;
+            
+            const apiKey = apiKeyInput.value.trim();
+            if (!apiKey) return alert("구조 추출을 위해 API Key를 먼저 입력해주세요.");
+
+            structureUploadText.classList.add('hidden');
+            structureLoading.classList.remove('hidden');
+            
+            try {
+                // 1. Extract Text from File
+                let fileText = "";
+                const fileData = await processFile(file);
+                
+                if (fileData.text) {
+                    fileText = fileData.text;
+                } else if (fileData.data) {
+                      // Image/PDF case - rely on Gemini Multimodal
+                } else {
+                    throw new Error("파일 내용을 읽을 수 없습니다.");
+                }
+
+                // NOTE: We do NOT add this to a separate context array (Format Ref removed)
+                // We just extract the structure to the text area.
+
+                // 2. Call Gemini to Extract Structure
+                const promptText = `
+                당신은 문서 구조 분석 전문가입니다.
+                제공된 파일의 내용을 분석하여 **문서의 목차(Table of Contents)**와 **핵심 구조**를 Markdown 형식으로 추출하십시오.
+                
+                [요구사항]
+                1. 오직 구조(# 헤더)만 출력하십시오. 설명이나 사족을 달지 마십시오.
+                2. 문서의 계층 구조(#, ##, ###)를 정확히 반영하십시오.
+                3. 내용이 없다면 일반적인 해당 문서 유형의 표준 목차를 제안하십시오.
+                
+                [출력 예시]
+                # 1. 서론
+                ## 1.1 배경
+                # 2. 본론
+                ...
+                `;
+
+                const parts = [{ text: promptText }];
+                if (fileData.text) {
+                    parts.push({ text: `[문서 내용]\n${fileData.text.substring(0, 10000)}...` }); // Limit context
+                } else if (fileData.data) {
+                    parts.push({ inlineData: { mimeType: fileData.mimeType, data: fileData.data } });
+                }
+
+                const modelName = modelSelect.value;
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{parts: parts}] })
+                });
+
+                if(!resp.ok) throw new Error("API Error");
+                const data = await resp.json();
+                const extractedStructure = data.candidates[0].content.parts[0].text;
+
+                // 3. Update UI
+                structureInput.value = extractedStructure;
+                templateSelect.value = 'custom'; // Switch to custom mode
+                
+                // Add visual cue
+                structureInput.classList.add('bg-blue-50');
+                setTimeout(() => structureInput.classList.remove('bg-blue-50'), 1000);
+
+            } catch (e) {
+                console.error(e);
+                alert("구조 추출 실패: " + e.message);
+            } finally {
+                structureUploadText.classList.remove('hidden');
+                structureLoading.classList.add('hidden');
+                structureFileInput.value = ''; // Reset
+            }
+        }
+
+
+        // --- Folder Indexer Logic ---
         folderInput.addEventListener('change', async (e) => {
-            const files = e.target.files; scannedFolderFiles = []; scannedFileList.innerHTML = '';
+            const files = e.target.files;
+            scannedFolderFiles = []; // Reset
+            scannedFileList.innerHTML = '';
+            
             if (files.length > 0) {
                 folderCount.textContent = `${files.length} files`;
                 let listHtml = '<ul class="list-disc pl-4 space-y-1">';
-                for(let file of files) { scannedFolderFiles.push({name: file.name}); listHtml += `<li>${file.name}</li>`; }
-                listHtml += '</ul>'; scannedFileList.innerHTML = listHtml;
+                
+                const interestingExts = ['.pdf','.docx','.xlsx','.xls','.hwp','.ppt','.pptx','.txt'];
+                
+                for(let file of files) {
+                    const ext = "." + file.name.split('.').pop().toLowerCase();
+                    if(interestingExts.includes(ext)) {
+                        scannedFolderFiles.push({
+                            name: file.name,
+                            path: file.webkitRelativePath || file.name
+                        });
+                        listHtml += `<li>${file.name}</li>`;
+                    }
+                }
+                listHtml += '</ul>';
+                
+                if (scannedFolderFiles.length === 0) {
+                      scannedFileList.innerHTML = '<p class="text-center text-gray-400 py-4">지원되는 문서 파일이 없습니다.</p>';
+                } else {
+                      scannedFileList.innerHTML = listHtml;
+                }
+                folderCount.textContent = `${scannedFolderFiles.length} docs found`;
             }
         });
 
-        function setupDragAndDrop(zone, input, arr, list) {
-            zone.addEventListener('click', () => input.click());
-            zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-            zone.addEventListener('dragleave', e => { e.preventDefault(); zone.classList.remove('drag-over'); });
-            zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files, arr, list); });
-            input.addEventListener('change', e => handleFiles(e.target.files, arr, list));
-        }
-        
-        async function handleFiles(files, arr, listEl) {
-            for(let f of files) { arr.push(await processFile(f)); }
-            renderFileList(arr, listEl);
-        }
-        
-        async function processFile(file) {
-             const item = {name: file.name, type: file.type};
-             const ext = "." + file.name.split('.').pop().toLowerCase();
-             // Simple loader for brevity - assume working from previous
-             if(ext === '.txt' || file.type.startsWith('text/')) {
-                 item.text = await file.text(); item.mimeType = 'text/plain';
-             } else {
-                 item.data = await new Promise(r => {const rd=new FileReader(); rd.onload=()=>r(rd.result.split(',')[1]); rd.readAsDataURL(file);});
-                 item.mimeType = file.type;
-             }
-             return item;
-        }
-        
-        function renderFileList(arr, el) {
-            el.innerHTML = arr.map((f,i) => `<div class="flex justify-between text-sm bg-gray-100 p-1 rounded mb-1"><span>${f.name}</span><button onclick="removeFile(${i})">x</button></div>`).join('');
-        }
-        window.removeFile = (i) => { uploadedDataFiles.splice(i, 1); renderFileList(uploadedDataFiles, document.getElementById('file-list-data')); };
-        setupDragAndDrop(document.getElementById('drop-zone-data'), document.getElementById('file-input-data'), uploadedDataFiles, document.getElementById('file-list-data'));
-        
-        // Structure Extraction
-        const structDrop = document.getElementById('structure-drop-zone');
-        const structInput = document.getElementById('structure-file-input');
-        structDrop.addEventListener('click', () => structInput.click());
-        structDrop.addEventListener('drop', (e) => { e.preventDefault(); handleStructureFile(e.dataTransfer.files[0]); });
-        structInput.addEventListener('change', (e) => handleStructureFile(e.target.files[0]));
 
-        async function handleStructureFile(file) {
-            if(!file) return;
-            const apiKey = apiKeyInput.value.trim();
-            if(!apiKey) return alert("API Key 필요");
-            structureUploadText.classList.add('hidden'); structureLoading.classList.remove('hidden');
-            try {
-                const data = await processFile(file);
-                const content = data.text ? data.text.substring(0, 10000) : "Image Data";
-                const prompt = `문서 구조 분석 전문가로서, 다음 파일의 목차와 구조를 Markdown(# Header) 형식으로 추출해줘:\n${content}`;
-                const result = await callGeminiAPI(apiKey, prompt, modelSelect.value);
-                structureInput.value = result;
-                templateSelect.value = 'custom';
-            } catch(e) { alert(e.message); }
-            finally { structureUploadText.classList.remove('hidden'); structureLoading.classList.add('hidden'); structInput.value = ''; }
-        }
+        // --- Drag & Drop Helper ---
+        function setupDragAndDrop(zoneId, inputId, targetArray, listId, removeFn) {
+            const dropZone = document.getElementById(zoneId);
+            const fileInput = document.getElementById(inputId);
+            const fileList = document.getElementById(listId);
 
-        // --- API Call Wrapper ---
-        async function callGeminiAPI(apiKey, text, model, files=[]) {
-            const parts = [{ text: text }];
-            files.forEach(f => {
-                if(f.text) parts.push({text: f.text});
-                else if(f.data) parts.push({inlineData: {mimeType: f.mimeType, data: f.data}});
+            dropZone.addEventListener('click', () => fileInput.click());
+
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                dropZone.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); });
+                document.body.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); });
             });
-            const config = { maxOutputTokens: 65536, temperature: 0.7 };
-            if (model.includes('gemini-3')) {
-                 const level = thinkingLevelSelect.value.toUpperCase();
-                 parts[0].text = `[System: Thinking Level ${level}]\n` + parts[0].text;
+
+            ['dragenter', 'dragover'].forEach(eventName => dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over')));
+            ['dragleave', 'drop'].forEach(eventName => dropZone.classList.remove('drag-over'));
+
+            dropZone.addEventListener('drop', (e) => {
+                dropZone.classList.remove('drag-over');
+                const items = e.dataTransfer.items;
+                if (items && items.length > 0 && items[0].webkitGetAsEntry) {
+                      handleFileItems(items, targetArray, fileList, removeFn);
+                } else {
+                      handleFiles(e.dataTransfer.files, targetArray, fileList, removeFn);
+                }
+            });
+            fileInput.addEventListener('change', (e) => {
+                handleFiles(e.target.files, targetArray, fileList, removeFn);
+                e.target.value = '';
+            });
+        }
+
+        // Recursive folder scanner
+        async function handleFileItems(items, targetArray, listContainer, removeFnName) {
+            const entries = [];
+            for (let i = 0; i < items.length; i++) {
+                const entry = items[i].webkitGetAsEntry();
+                if (entry) entries.push(entry);
             }
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ contents: [{parts: parts}], generationConfig: config })
-            });
-            if(!resp.ok) throw new Error((await resp.json()).error?.message || "API Error");
-            const data = await resp.json();
-            return data.candidates[0].content.parts[0].text;
+            
+            for (const entry of entries) {
+                await scanEntry(entry, targetArray);
+            }
+            renderFileList(targetArray, listContainer, removeFnName);
         }
 
-        // --- Main Gen Logic ---
+        async function scanEntry(entry, targetArray) {
+             if (entry.isFile) {
+                return new Promise((resolve) => {
+                    entry.file(async (file) => {
+                        try {
+                            const fileData = await processFile(file);
+                            targetArray.push(fileData);
+                        } catch (err) {
+                            console.error(`Error processing ${file.name}`, err);
+                        }
+                        resolve();
+                    });
+                });
+            } else if (entry.isDirectory) {
+                const dirReader = entry.createReader();
+                const readEntries = async () => {
+                    return new Promise((resolve) => {
+                        dirReader.readEntries(async (entries) => {
+                            if (entries.length === 0) { resolve(); return; }
+                            for (const subEntry of entries) {
+                                await scanEntry(subEntry, targetArray);
+                            }
+                            await readEntries(); 
+                            resolve();
+                        });
+                    });
+                };
+                await readEntries();
+            }
+        }
+
+        async function handleFiles(files, targetArray, listContainer, removeFnName) {
+            for (const file of Array.from(files)) {
+                try {
+                    const fileData = await processFile(file);
+                    targetArray.push(fileData);
+                } catch (err) {
+                    console.error(err);
+                    alert(`파일 오류: ${file.name}`);
+                }
+            }
+            renderFileList(targetArray, listContainer, removeFnName);
+        }
+
+        async function processFile(file) {
+            const item = { name: file.name, mimeType: file.type, data: null, text: null };
+            const supportedExts = ['.pdf','.docx','.pptx','.xlsx','.xls','.txt','.md','.csv','.jpg','.png'];
+            const ext = "." + file.name.split('.').pop().toLowerCase();
+            
+            if (!supportedExts.includes(ext) && !file.type.startsWith('image/') && !file.type.startsWith('text/')) {
+                 return item; 
+            }
+
+            if (file.type.includes('wordprocessingml') || file.name.endsWith('.docx')) {
+                try {
+                    const buff = await file.arrayBuffer();
+                    const res = await mammoth.extractRawText({ arrayBuffer: buff });
+                    item.text = `[파일: ${file.name}]\n${res.value}\n`;
+                    item.mimeType = 'text/plain';
+                } catch(e) {
+                    item.text = `[파일: ${file.name}] (텍스트 추출 실패)\n`;
+                    item.mimeType = 'text/plain';
+                }
+            } else if (file.type.includes('presentationml') || file.name.endsWith('.pptx')) {
+                try {
+                    const zip = await JSZip.loadAsync(file);
+                    const slideFiles = Object.keys(zip.files).filter(name => name.match(/ppt\/slides\/slide\d+\.xml/));
+                    slideFiles.sort((a, b) => {
+                        const numA = parseInt(a.match(/slide(\d+)\.xml/)[1]);
+                        const numB = parseInt(b.match(/slide(\d+)\.xml/)[1]);
+                        return numA - numB;
+                    });
+                    let fullText = `[파일: ${file.name}]\n`;
+                    for (const slideName of slideFiles) {
+                        const slideXml = await zip.file(slideName).async("string");
+                        const parser = new DOMParser();
+                        const xmlDoc = parser.parseFromString(slideXml, "text/xml");
+                        const textNodes = xmlDoc.getElementsByTagName("a:t");
+                        let slideText = "";
+                        for (let i = 0; i < textNodes.length; i++) {
+                            slideText += textNodes[i].textContent + " ";
+                        }
+                        fullText += `[Slide ${slideName.match(/\d+/)[0]}] ${slideText}\n`;
+                    }
+                    item.text = fullText;
+                    item.mimeType = 'text/plain';
+                } catch (e) {
+                    item.text = `[파일: ${file.name}] (PPTX 텍스트 추출 실패)\n`;
+                    item.mimeType = 'text/plain';
+                }
+            } else if (file.type.includes('spreadsheetml') || file.name.endsWith('.xlsx') || file.name.endsWith('.xls')) {
+                try {
+                    const data = await file.arrayBuffer();
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    let excelText = `[파일: ${file.name}]\n`;
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        const csv = XLSX.utils.sheet_to_csv(worksheet);
+                        excelText += `[Sheet: ${sheetName}]\n${csv}\n`;
+                    });
+                    item.text = excelText;
+                    item.mimeType = 'text/plain';
+                } catch (e) {
+                    item.text = `[파일: ${file.name}] (엑셀 텍스트 추출 실패)\n`;
+                    item.mimeType = 'text/plain';
+                }
+            } else if (file.type.startsWith('text/') || file.name.endsWith('.md') || file.name.endsWith('.csv')) {
+                item.text = `[파일: ${file.name}]\n${await file.text()}\n`;
+                item.mimeType = 'text/plain';
+            } else {
+                item.data = await readFileAsBase64(file);
+                item.mimeType = file.type;
+            }
+            return item;
+        }
+
+        function readFileAsBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(reader.result.split(',')[1]);
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function renderFileList(files, container, removeFnName) {
+            container.innerHTML = '';
+            files.forEach((file, index) => {
+                container.innerHTML += `
+                    <div class="flex items-center justify-between bg-slate-100 px-3 py-2 rounded text-sm mb-1 border">
+                        <span class="truncate w-10/12">${file.name}</span>
+                        <button class="text-slate-400 hover:text-red-500 font-bold" onclick="${removeFnName}(${index}); event.stopPropagation();">×</button>
+                    </div>`;
+            });
+        }
+
+        setupDragAndDrop('drop-zone-data', 'file-input-data', uploadedDataFiles, 'file-list-data', 'removeDataFile');
+
+        window.removeDataFile = (i) => { uploadedDataFiles.splice(i, 1); renderFileList(uploadedDataFiles, document.getElementById('file-list-data'), 'removeDataFile'); };
+
+
+        // --- Image Generation Logic ---
+        async function generateImage(prompt, apiKey) {
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image-preview:generateContent?key=${apiKey}`;
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }],
+                        generationConfig: { responseModalities: ["IMAGE"] }
+                    })
+                });
+                if (!response.ok) throw new Error("Image Gen Failed");
+                const data = await response.json();
+                const base64 = data.candidates?.[0]?.content?.parts?.find(p => p.inlineData)?.inlineData?.data;
+                if (base64) return `data:image/png;base64,${base64}`;
+                return null;
+            } catch (e) {
+                console.error("Image generation error:", e);
+                return null;
+            }
+        }
+
+        async function processDiagrams(text, apiKey) {
+            const diagramRegex = /\{\{DIAGRAM:\s*(.*?)\}\}/g;
+            let match;
+            let newText = text;
+            const matches = [];
+            while ((match = diagramRegex.exec(text)) !== null) {
+                matches.push({ full: match[0], prompt: match[1] });
+            }
+            if (matches.length > 0) {
+                loadingSubtext.innerText = `도식화 이미지 ${matches.length}개 생성 중...`;
+                for (const m of matches) {
+                    const imageUrl = await generateImage(m.prompt + " white background, diagram, schematic, professional, clean lines", apiKey);
+                    if (imageUrl) {
+                        newText = newText.replace(m.full, `\n![도식화: ${m.prompt}](${imageUrl})\n`);
+                    } else {
+                        newText = newText.replace(m.full, `\n*(이미지 생성 실패: ${m.prompt})*\n`);
+                    }
+                }
+            }
+            return newText;
+        }
+
+        // --- Copy to Clipboard ---
+        copyHtmlBtn.addEventListener('click', () => {
+            if (!generatedText) return;
+            const htmlContent = markdownOutput.innerHTML;
+            const blobHtml = new Blob([htmlContent], { type: "text/html" });
+            const blobText = new Blob([markdownOutput.innerText], { type: "text/plain" });
+            const data = [new ClipboardItem({ "text/html": blobHtml, "text/plain": blobText })];
+            navigator.clipboard.write(data).then(() => {
+                const originalText = copyHtmlBtn.innerHTML;
+                copyHtmlBtn.innerHTML = '<span class="text-green-600">✔ 복사됨</span>';
+                setTimeout(() => copyHtmlBtn.innerHTML = originalText, 2000);
+            }).catch(err => {
+                console.error('Clipboard write failed:', err);
+                alert("복사 실패. 브라우저 호환성을 확인하세요.");
+            });
+        });
+
+        // --- EDIT MODE TOGGLE ---
+        editToggleBtn.addEventListener('click', () => {
+            if (!generatedText && !isEditing) return; // Prevent toggle if empty
+            isEditing = !isEditing;
+            if (isEditing) {
+                markdownOutput.contentEditable = "true";
+                markdownOutput.focus();
+                editToggleBtn.innerHTML = '<span>✅ 완료</span>';
+                editToggleBtn.classList.replace('text-blue-600', 'text-green-600');
+            } else {
+                markdownOutput.contentEditable = "false";
+                generatedText = turndownService.turndown(markdownOutput.innerHTML);
+                markdownOutput.innerHTML = marked.parse(generatedText);
+                editToggleBtn.innerHTML = '<span>✏️ 편집</span>';
+                editToggleBtn.classList.replace('text-green-600', 'text-blue-600');
+            }
+        });
+
+
+        // --- Refinement Logic ---
+        refineBtn.addEventListener('click', async () => {
+            const refineQuery = refinementInput.value.trim();
+            if (!refineQuery) return alert("추가 요청 사항을 입력해주세요.");
+            if (!generatedText) return alert("먼저 문서를 생성해주세요.");
+            
+            const apiKey = apiKeyInput.value.trim();
+            const modelName = modelSelect.value;
+            
+            loadingIndicator.classList.remove('hidden');
+            loadingIndicator.classList.add('flex');
+            markdownOutput.classList.add('hidden');
+            if (isEditing) editToggleBtn.click();
+            loadingText.innerText = "추가 요청 반영 중...";
+            loadingSubtext.innerText = "기존 내용을 바탕으로 수정/보완합니다.";
+            progressBar.style.width = "70%";
+            
+            try {
+                const promptParts = [{
+                    text: `당신은 문서 수정 및 보완 전문가입니다. 
+                    아래 [기존 문서 내용]을 바탕으로 사용자의 [추가 요청 사항]을 반영하여 **추가적으로 필요한 내용**을 작성하십시오.
+                    
+                    # Task
+                    기존 문서의 내용을 전면 재작성하지 말고, 사용자가 요청한 **추가 분석, 수정 사항, 또는 보완 내용**을 
+                    **"## 🔄 추가 요청 반영 ([${new Date().toLocaleTimeString()}])"** 이라는 제목 하위에 작성하십시오.
+                    
+                    # 기존 문서 내용 (Context)
+                    ${generatedText.substring(0, 15000)} ... (생략)
+                    
+                    # 사용자 추가 요청 (Refinement Request)
+                    "${refineQuery}"
+                    
+                    # Output Format
+                    오직 추가될 내용(Markdown)만 출력하세요.`
+                }];
+
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{parts: promptParts}] })
+                });
+
+                if(!resp.ok) throw new Error("Refinement API Error");
+                const data = await resp.json();
+                const addedText = data.candidates[0].content.parts[0].text;
+                
+                // Append result
+                generatedText += "\n\n" + addedText;
+                
+                // Refresh UI
+                markdownOutput.innerHTML = marked.parse(generatedText);
+                refinementInput.value = ''; // Clear input
+                
+            } catch(e) {
+                alert(`오류: ${e.message}`);
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                loadingIndicator.classList.remove('flex');
+                markdownOutput.classList.remove('hidden');
+                progressBar.style.width = "0%";
+            }
+        });
+
+
+        // --- Core Generation Logic ---
         async function generateContent(mode) {
             const apiKey = apiKeyInput.value.trim();
-            if (!apiKey) return alert("API Key 필요");
-            
-            currentMode = mode;
-            abortController = new AbortController();
-            
-            // UI
-            emptyState.classList.add('hidden'); markdownOutput.classList.add('hidden');
-            loadingIndicator.classList.remove('hidden'); loadingIndicator.classList.add('flex');
-            
+            if (!apiKey) return alert("API Key를 입력해주세요.");
+
+            const selectedTemplate = templateSelect.value;
             let structure = structureInput.value.trim();
-            if(!structure) structure = templates['simple_review'];
-            const context = contextInput.value.trim();
+            let context = contextInput.value.trim();
+            const modelName = modelSelect.value;
+            const useDiagram = diagramToggle.checked;
+            const thinkingLevel = thinkingLevelSelect.value;
             const rfiExisting = existingRfiInput.value.trim();
 
-            try {
-                if(mode==='RFI') {
-                    loadingText.innerText = "RFI 생성 중...";
-                    const today = new Date().toISOString().split('T')[0];
-                    const fileListStr = scannedFolderFiles.map((f,i)=>`| ${i+1} | ${f.name} | ${today} | - |`).join('\n');
-                    const prompt = `M&A 실사 매니저로서 RFI 테이블을 작성하시오.\n질문: ${context}\n기존RFI: ${rfiExisting}\n파일목록: ${fileListStr}\nRules: 1.제공자료표 2.기존RFI표 3.추가요청표 작성. 설명 열 필수.`;
-                    generatedText = await callGeminiAPI(apiKey, prompt, modelSelect.value, uploadedDataFiles);
+            if (!structure) {
+                if (selectedTemplate === 'custom') {
+                    structure = "# 1. Executive Summary (자동 생성)\n# 2. 상세 분석 (자동 생성)\n# 3. 결론 및 제언 (자동 생성)";
+                } else if (selectedTemplate === 'rfi') {
+                    structure = "RFI Generation";
                 } else {
-                    const sections = structure.split(/(?=^# )/gm).filter(s => s.trim().length > 0);
-                    let fullText = "";
-                    for(let i=0; i<sections.length; i++) {
-                        loadingText.innerText = `챕터 작성: ${i+1}/${sections.length}`;
-                        loadingSubtext.innerText = sections[i].split('\n')[0];
-                        const prompt = `Role: ${mode==='WORD'?'PEF 심사역':'PPT 전문가'}\nTask: 이 챕터를 작성하시오.\nChapter: ${sections[i]}\nContext: ${context}\nRules: 상세 작성, 마크다운 표, 출처 명시, ${diagramToggle.checked?'도식화 태그 사용':''}`;
-                        let part = await callGeminiAPI(apiKey, prompt, modelSelect.value, uploadedDataFiles);
-                        if(diagramToggle.checked) part = await processDiagrams(part, apiKey); // Assume func exists
-                        fullText += part + "\n\n";
-                    }
-                    generatedText = fullText;
+                    structure = templates[selectedTemplate] || templates['simple_review'];
                 }
-                
-                markdownOutput.innerHTML = marked.parse(generatedText);
-                loadingIndicator.classList.add('hidden'); loadingIndicator.classList.remove('flex');
-                markdownOutput.classList.remove('hidden');
-                
-                // Enable Buttons
-                if(mode==='RFI') downloadXlsBtn.disabled = false;
-                else { downloadDocxBtn.disabled = false; downloadPptBtn.disabled = false; }
+            }
+            
+            currentMode = mode;
 
-            } catch(e) {
-                alert(e.message);
-                loadingIndicator.classList.add('hidden'); loadingIndicator.classList.remove('flex');
-                emptyState.classList.remove('hidden');
+            // UI Reset
+            abortController = new AbortController();
+            emptyState.classList.add('hidden');
+            markdownOutput.classList.add('hidden');
+            refinementSection.classList.add('hidden'); // Hide refinement during gen
+            loadingIndicator.classList.remove('hidden');
+            loadingIndicator.classList.add('flex');
+            
+            generateWordBtn.disabled = true;
+            generatePptBtn.disabled = true;
+            generateRfiBtn.disabled = true;
+            generateWordBtn.classList.add('opacity-50');
+            generatePptBtn.classList.add('opacity-50');
+            generateRfiBtn.classList.add('opacity-50');
+            
+            // Mode Badge & Button Highlight
+            if (selectedTemplate === 'rfi') {
+                modeBadge.innerText = "Mode: RFI (Excel)";
+                modeBadge.className = "px-2 py-1 text-xs font-bold rounded bg-green-100 text-green-700";
+            } else if (mode === 'WORD') {
+                modeBadge.innerText = "Mode: Word Report";
+                modeBadge.className = "px-2 py-1 text-xs font-bold rounded bg-blue-100 text-blue-700";
+            } else {
+                modeBadge.innerText = "Mode: PPT Slides";
+                modeBadge.className = "px-2 py-1 text-xs font-bold rounded bg-orange-100 text-orange-700";
+            }
+            modeBadge.classList.remove('hidden');
+
+            generatedText = "";
+            let currentText = "";
+
+            try {
+                // RFI Mode Handling
+                if (selectedTemplate === 'rfi') {
+                    loadingText.innerText = `RFI(자료요청목록) 생성 중...`;
+                    loadingSubtext.innerText = `보유 자료 목록화 및 질문 분석`;
+                    progressBar.style.width = `50%`;
+
+                    const todayDate = new Date().toISOString().split('T')[0];
+                    let scannedFilesString = "";
+                    
+                    if (scannedFolderFiles.length > 0) {
+                        scannedFilesString = scannedFolderFiles.map((f, i) => 
+                            `| ${i+1} | ${f.name} | ${todayDate} | - |`
+                        ).join('\n');
+                    }
+
+                    const systemInstruction = `당신은 회계법인 FAS(Financial Advisory Services)팀의 **M&A 실사(Due Diligence) 전문 매니저**입니다.
+                    기업이 주장하는 내용을 맹신하지 않고, 반드시 **객관적인 근거 데이터(계약서, 원장, 신고서 등)**로 검증하는 보수적인 태도를 가집니다.
+                    
+                    # Context: [기본 실사 체크리스트]
+                    당신은 아래의 표준 실사 체크리스트 내용을 완벽히 숙지하고 있습니다. 
+                    ***중요: 사용자가 별도의 질문을 하지 않더라도, 아래의 필수 체크리스트 항목들은 기본적으로 포함되어야 합니다.***
+                    ---
+                    1. 회사일반: 주주명부, 정관, 등기부등본, 조직도, 이사회 의사록, 경영진 이력
+                    2. 재무/회계: 최근 3개년 감사보고서, 계정별 원장, 월별 결산서, 우발채무, 차입금 현황
+                    3. 영업/시장: 시장규모 및 M/S 분석 자료(외부), 주요 매출처 계약서, 수주잔고(Backlog), 단가 정책
+                    4. 기술/생산: 특허 리스트, 생산설비 대장, 수율/가동률 데이터, 라이선스 계약
+                    5. 인사/노무: 급여대장, 노조 현황, 퇴직금 추계액, 근속연수 분석
+                    6. 법무: 진행 중인 소송 리스트, 제재 내역, 특수관계인 거래 내역
+                    ---
+                    
+                    # Task
+                    사용자가 입력한 **"구체적인 질문"**이나 **"우려 사항"**을 해소하기 위해 받아야 할 **RFI(자료요청목록) 테이블**을 작성하십시오.
+                    
+                    # Rules (Critical)
+                    0. **[제공 자료] 자동 생성**: 사용자가 보유한 파일 목록이 제공되면, **가장 먼저 [1. 제공 자료 현황] 표**를 작성하십시오.
+                        - 양식: | No. | 파일명 | 제공일자 | 비고 |
+                        - 제공일자는 오늘 날짜(${todayDate})로 기재하십시오.
+                    1. **[기존 RFI] 우선 기재**: 사용자가 제공한 **[기존 RFI Copy & Paste]** 데이터가 있다면, 해당 내용을 분석하여 Markdown Table의 **상단에 먼저 [2. 기존 RFI 목록]**으로 정리하십시오.
+                    2. **[신규 요청] 추가**: 사용자의 **[신규 요청/질문]**을 분석하고, [기본 실사 체크리스트] 중 누락된 필수 항목을 더해 **[3. 추가 자료 요청 목록]** 표를 작성하십시오. (기존 목록과 중복 제외)
+                    3. **질문의 RFI 변환 (필수)**: 사용자의 질문이나 우려 사항이 **정성적 이슈(사유, 배경, 정책 등)**인 경우, 단순 문서명이 아닌 **"~을 확인할 수 있는 자료"** 또는 **"~에 대한 구체적인 설명자료"**와 같이 **질문 형태의 요청 항목**으로 변환하여 기재하십시오. (예: '매출 감소 사유' -> '최근 매출 감소의 구체적인 원인 및 배경을 설명하는 내부 보고서 또는 분석 자료')
+                    4. **기본 포함**: 위 [기본 실사 체크리스트] 중 누락된 필수 항목이 있다면 추가 요청 목록에 넣으십시오.
+                    5. **설명 분리 및 간소화**: 요청 자료에 대한 부연 설명은 반드시 **'설명' 열에 별도로 기재**하되, **최대한 간결하고 핵심만** 작성하십시오. (장황한 설명 금지, 셀 안에 <br> 태그 사용 금지)
+                    6. **시스템 메시지 제거**: 결과물에는 오직 Markdown Table과 필요한 코멘트만 출력하십시오.
+                    7. **포맷 준수**: 아래 Markdown Table 양식을 정확히 따르십시오.
+                        | No. | 구분 | 요청자료 | 설명 | 요청일자 |
+                        | --- | --- | --- | --- | --- |
+                        (구분은 [회사일반/재무/영업/기술/인사/법무] 중 택 1)
+                        (요청일자는 오늘 기준 +10일 뒤 날짜)
+                    `;
+
+                    const promptParts = [{
+                        text: `${systemInstruction}
+                        
+                        # [기존 RFI Copy & Paste] (사용자가 붙여넣은 기존 목록)
+                        ${rfiExisting ? rfiExisting : "없음"}
+
+                        # [신규 요청/질문] (사용자가 새로 입력한 질문)
+                        ${context}
+                        
+                        [사용자가 보유한 파일 목록 (스캔된 폴더)]
+                        ${scannedFilesString ? scannedFilesString : "없음"}
+                        
+                        [참고 파일 정보 (Contents Analysis용)]
+                        ${uploadedDataFiles.length > 0 ? uploadedDataFiles.map(f => f.name).join(', ') : "없음"}`
+                    }];
+
+                    // Append Files
+                    if(uploadedDataFiles.length) {
+                        promptParts.push({ text: "\n=== [업로드된 파일 데이터 전문] ===\n" });
+                        uploadedDataFiles.forEach(f => f.text ? promptParts.push({text: f.text}) : promptParts.push({inlineData: {mimeType: f.mimeType, data: f.data}}));
+                    }
+
+                    const generationConfig = {
+                        maxOutputTokens: 65536,
+                        temperature: 0.2
+                    };
+                    
+                    if (modelName.includes('gemini-3')) {
+                        promptParts[0].text = `[System: Thinking Level ${thinkingLevel.toUpperCase()}]\n` + promptParts[0].text;
+                    }
+
+                    const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                        method: 'POST',
+                        signal: abortController.signal,
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({ contents: [{parts: promptParts}], generationConfig: generationConfig })
+                    });
+
+                    if(!resp.ok) throw new Error((await resp.json()).error?.message || "API Error");
+                    const data = await resp.json();
+                    
+                    let rawText = data.candidates[0].content.parts[0].text;
+                    currentText = rawText.replace(/\[System:.*?\]/g, '').trim(); 
+
+                } else {
+                    // Normal Document Generation (Sequential Loop)
+                    const sections = structure.split(/(?=^# )/gm).filter(s => s.trim().length > 0);
+                    
+                    for (let i = 0; i < sections.length; i++) {
+                        const sectionContent = sections[i];
+                        const sectionTitle = sectionContent.split('\n')[0].replace('# ', '').trim();
+                        
+                        const progress = Math.round(((i) / sections.length) * 100);
+                        progressBar.style.width = `${progress}%`;
+                        loadingText.innerText = `챕터 작성 중: ${i + 1}/${sections.length}`;
+                        loadingSubtext.innerText = `현재 작성: ${sectionTitle}`;
+
+                        let systemInstruction = "";
+                        let diagramInstruction = useDiagram ? 
+                            `5. **도식화(Diagram)**: 설명 중 시각화가 필요한 프로세스나 구조가 있다면 **{{DIAGRAM: 설명}}** 태그를 삽입하세요.` : "";
+
+                        if (mode === 'WORD') {
+                            let detailLevelInstruction = "";
+                            if (selectedTemplate === 'simple_review') {
+                                detailLevelInstruction = `2. **작성 분량 및 깊이**: 약 5페이지 분량(Word 기준)의 **간결하면서도 핵심이 담긴 요약 보고서**를 작성하세요. 장황한 나열보다는 핵심 요약과 근거 위주로 명료하게 서술하세요.`;
+                            } else {
+                                detailLevelInstruction = `2. **상세 작성**: 제공된 [분석 데이터]의 **모든 페이지**를 꼼꼼히 분석하여, 내용을 축약하지 말고 **최대한 상세하게** 작성하세요. 구체적인 수치(매출액, 영업이익률, CAGR 등)를 반드시 포함하세요.`;
+                            }
+
+                            systemInstruction = `당신은 **국내 최정상급 PEF/VC 수석 심사역**입니다. 
+                            [대상 기업]에 대한 투자를 승인받기 위해 투심위 위원들을 설득할 수 있는 **'투자심사보고서(Investment Memorandum)'**를 작성 중입니다.
+                            
+                            [작성 원칙 - Word 모드]
+                            1. **분석 태도 (최우선)**: 제공된 자료들은 회사나 자문사가 작성한 홍보성 자료임을 감안하여, **최대한 객관적이고 보수적인 태도**로 분석하세요. 장밋빛 전망은 배제하고, 리스크와 하방 요인을 비판적으로 검토해야 합니다.
+                            ${detailLevelInstruction}
+                            3. **서술 방식**: 가독성을 위해 **개조식(Bullet points)**을 적극 활용하되, 단순 나열이 아닌 논리적 연결이 있는 문장형 개조식을 사용하세요. 전문 비즈니스 용어(EBITDA, Valuation, IRR, MoIC, Downside protection 등)를 적절히 사용하세요.
+                            4. **표(Table)**: 원본 데이터의 재무 수치나 비교 자료는 Markdown Table로 변환하여 삽입하세요.
+                            5. **출처 표기**: 데이터 인용 시 바로 아래에 "Source : [문서의 실제 제목] (p.[페이지])"를 명시하세요.
+                            6. **표 양식**: 1열(항목) 좌측정렬, 나머지(수치) 우측정렬. 단위는 표 좌상단(A1)에만 표기.
+                            ${diagramInstruction}
+                            
+                            [현재 작업]
+                            전체 보고서 중 **"${sectionTitle}"** 챕터만 작성하세요. 
+                            입력된 [문서 구조]의 하위 목차를 빠짐없이 다루세요.`;
+                        } else {
+                            systemInstruction = `당신은 **프레젠테이션 전문가**이자 **깐깐한 투자 심사역**입니다. 
+                            [작성 원칙 - PPT 모드]
+                            1. **분석 태도**: 제공된 자료가 회사 측 주장임을 인지하고, **객관적이고 보수적인 관점**에서 핵심 내용을 요약하세요. 과장된 표현은 걸러내고 팩트 위주로 구성하세요.
+                            2. **핵심 요약**: 긴 줄글 대신 슬라이드에 들어갈 핵심 메시지 위주로 **간결한 개조식** 작성.
+                            3. **슬라이드 구조**: 각 하위 목차(##)를 슬라이드 제목으로 간주하고 내용을 구성하세요.
+                            4. **데이터 시각화**: 핵심 수치는 Markdown Table로 요약하세요.
+                            5. **출처**: "Source : [문서명]" 형식으로 하단에 기재.
+                            6. **표 양식**: 첫 번째 열은 텍스트(좌측 정렬), 나머지 열은 수치(우측 정렬). 단위는 헤더(A1)에만 표기.
+                            ${diagramInstruction}
+                            
+                            [현재 작업]
+                            전체 발표자료 중 **"${sectionTitle}"** 파트만 작성하세요.`;
+                        }
+
+                        if (selectedTemplate === 'custom' && !structureInput.value.trim()) {
+                             systemInstruction += `\n\n[추가 지시] 사용자가 별도의 문서 구조를 입력하지 않았습니다. 제공된 데이터의 내용을 바탕으로 **가장 논리적이고 전문적인 목차를 스스로 구성**하여 해당 챕터 내용을 작성하세요.`;
+                        }
+
+                        const promptParts = [{
+                            text: `${systemInstruction}
+                            
+                            [작성할 챕터 구조]
+                            ${sectionContent}
+                            
+                            [전체 맥락]
+                            ${context}
+                            
+                            [분석 데이터 활용]
+                            첨부된 파일 내용을 바탕으로 작성하세요. 없는 내용은 지어내지 말고, 추론이 필요하면 [추후 실사 필요]라고 명시하세요.`
+                        }];
+
+                        if(uploadedDataFiles.length) {
+                            promptParts.push({ text: "\n=== [분석 데이터] ===\n" });
+                            uploadedDataFiles.forEach(f => f.text ? promptParts.push({text: f.text}) : promptParts.push({inlineData: {mimeType: f.mimeType, data: f.data}}));
+                        }
+                        
+                        // Note: Format Ref removed, so no uploadedFormatFiles logic here
+
+                        const generationConfig = { maxOutputTokens: 65536, temperature: 0.7 };
+                        if (modelName.includes('gemini-3')) {
+                            promptParts[0].text = `[System: Thinking Level ${thinkingLevel.toUpperCase()}]\n` + promptParts[0].text;
+                        }
+
+                        const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
+                            method: 'POST',
+                            signal: abortController.signal,
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ contents: [{parts: promptParts}], generationConfig: generationConfig })
+                        });
+
+                        if(!resp.ok) throw new Error((await resp.json()).error?.message || "API Error");
+                        
+                        const data = await resp.json();
+                        let sectionText = data.candidates[0].content.parts[0].text;
+
+                        if (useDiagram) {
+                            loadingSubtext.innerText = `${sectionTitle} 관련 이미지 생성 중...`;
+                            sectionText = await processDiagrams(sectionText, apiKey);
+                        }
+                        currentText += sectionText + "\n\n";
+                    }
+                }
+
+                progressBar.style.width = `100%`;
+                loadingText.innerText = "완료!";
+                generatedText = currentText;
+
+                markdownOutput.innerHTML = marked.parse(generatedText);
+                loadingIndicator.classList.add('hidden');
+                loadingIndicator.classList.remove('flex');
+                markdownOutput.classList.remove('hidden');
+                refinementSection.classList.remove('hidden'); // Show Refinement
+                
+                // Final Enable
+                if (selectedTemplate === 'rfi') {
+                    downloadXlsBtn.disabled = false;
+                } else {
+                    downloadDocxBtn.disabled = false;
+                    downloadPptBtn.disabled = false;
+                }
+                copyBtn.disabled = false;
+
+            } catch (e) {
+                if (e.name !== 'AbortError') alert(`오류: ${e.message}`);
+                loadingIndicator.classList.add('hidden');
+                loadingIndicator.classList.remove('flex');
+                if(!generatedText) emptyState.classList.remove('hidden');
+            } finally {
+                generateWordBtn.disabled = false;
+                generatePptBtn.disabled = false;
+                generateRfiBtn.disabled = false;
+                generateWordBtn.classList.remove('opacity-50');
+                generatePptBtn.classList.remove('opacity-50');
+                generateRfiBtn.classList.remove('opacity-50');
+                abortController = null;
+                progressBar.style.width = `0%`; 
             }
         }
+
+        generateWordBtn.addEventListener('click', () => generateContent('WORD'));
+        generatePptBtn.addEventListener('click', () => generateContent('PPT'));
+        generateRfiBtn.addEventListener('click', () => generateContent('RFI')); 
+        stopBtn.addEventListener('click', () => abortController?.abort());
         
-        // --- Word Export (Refactored) ---
-        downloadDocxBtn.addEventListener('click', async () => {
-            if(!generatedText) return;
-            try {
-                const now = new Date();
-                const fileName = `Report_${now.toISOString().slice(0,10)}.docx`;
-                
-                // Parse lines
-                const lines = generatedText.split('\n');
-                const docChildren = [];
-                let tRows = [];
-                let inTable = false;
-
-                // Simple parser
-                for (let line of lines) {
-                    const trimmed = line.trim();
+        // ... (Export Logics: XLS, PPT, DOCX - Kept as is) ...
+         downloadXlsBtn.addEventListener('click', () => { 
+            if (!generatedText) return; 
+            const lines = generatedText.split('\n'); 
+            const data = []; 
+            lines.forEach(line => { 
+                const trimmed = line.trim();
+                if (trimmed.startsWith('|')) { 
+                    if (trimmed.includes('---')) return; 
+                    const row = trimmed.split('|');
+                    // Handle split logic: 
+                    // | cell | cell | -> ["", "cell", "cell", ""]
+                    if(row.length > 0 && row[0].trim() === '') row.shift();
+                    if(row.length > 0 && row[row.length-1].trim() === '') row.pop();
                     
-                    // Image (Base64)
-                    if (trimmed.startsWith('![') && trimmed.includes('data:image')) {
-                        const match = trimmed.match(/\((data:image\/[^;]+;base64,[^)]+)\)/);
-                        if(match) {
-                            const blob = await fetch(match[1]).then(r => r.blob());
-                            docChildren.push(new docx.Paragraph({
-                                children: [new docx.ImageRun({ data: await blob.arrayBuffer(), transformation: {width: 400, height: 300} })],
-                                alignment: docx.AlignmentType.CENTER
-                            }));
-                        }
-                        continue;
-                    }
-
-                    // Table
-                    if (trimmed.startsWith('|')) {
-                        if (trimmed.includes('---')) continue;
-                        const cells = trimmed.split('|').slice(1, -1).map(c => new docx.TableCell({
-                            children: [new docx.Paragraph({ text: c.trim() })],
-                            borders: { top: {style: "single", size: 1}, bottom: {style: "single", size: 1}, left: {style: "single", size: 1}, right: {style: "single", size: 1} }
-                        }));
-                        tRows.push(new docx.TableRow({ children: cells }));
-                        inTable = true;
-                    } else {
-                        if (inTable) {
-                            if (tRows.length > 0) docChildren.push(new docx.Table({ rows: tRows, width: {size: 100, type: "pct"} }));
-                            tRows = []; inTable = false;
-                            docChildren.push(new docx.Paragraph({text: ""}));
-                        }
-
-                        // Headers
-                        if (trimmed.startsWith('# ')) docChildren.push(new docx.Paragraph({ text: trimmed.slice(2), heading: docx.HeadingLevel.HEADING_1 }));
-                        else if (trimmed.startsWith('## ')) docChildren.push(new docx.Paragraph({ text: trimmed.slice(3), heading: docx.HeadingLevel.HEADING_2 }));
-                        else if (trimmed.toLowerCase().startsWith('source')) docChildren.push(new docx.Paragraph({ text: trimmed, alignment: docx.AlignmentType.RIGHT }));
-                        else if (trimmed) docChildren.push(new docx.Paragraph({ text: trimmed }));
-                    }
-                }
-                // Flush table at end
-                if (inTable && tRows.length > 0) docChildren.push(new docx.Table({ rows: tRows, width: {size: 100, type: "pct"} }));
-
-                const doc = new docx.Document({ sections: [{ children: docChildren }] });
-                const blob = await docx.Packer.toBlob(doc);
-                saveAs(blob, fileName);
-            } catch(e) {
-                console.error(e);
-                alert("Word 생성 실패: " + e.message);
-            }
+                    const cleanRow = row.map(cell => cell.trim().replace(/\*\*/g, '').replace(/<br>/g, '\n').replace(/\[.*?\]/g, '')); 
+                    data.push(cleanRow); 
+                } 
+            }); 
+            if (data.length === 0) { alert("RFI 테이블 데이터를 찾을 수 없습니다."); return; } 
+            const ws = XLSX.utils.aoa_to_sheet(data); 
+            const wb = XLSX.utils.book_new(); 
+            XLSX.utils.book_append_sheet(wb, ws, "RFI_List"); 
+            XLSX.writeFile(wb, "Gemini_RFI_List.xlsx"); 
         });
 
-        // (Other exports & listeners same as before)
-        // ... (Copy, Edit, Refine, PPT, XLS logic) ...
-        copyHtmlBtn.addEventListener('click', () => { /*...*/ });
-        editToggleBtn.addEventListener('click', () => { /*...*/ });
-        refineBtn.addEventListener('click', () => { /*...*/ });
-        downloadXlsBtn.addEventListener('click', () => { /*...*/ });
-        downloadPptBtn.addEventListener('click', () => { /*...*/ });
-
+        downloadPptBtn.addEventListener('click', async () => { if (!generatedText) return; const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_16x9'; pptx.defineSlideMaster({ title: 'MASTER_SLIDE', background: { color: 'FFFFFF' }, objects: [ { rect: { x: 0, y: 0, w: '100%', h: 0.75, fill: { color: '1E3A8A' } } }, { text: { text: 'Gemini Report', options: { x: 0.5, y: 0.15, w: 9, color: 'FFFFFF', fontSize: 14 } } }, { text: { text: new Date().toLocaleDateString(), options: { x: 10.5, y: 0.15, w: 2.5, color: 'FFFFFF', fontSize: 12, align: 'right' } } } ] }); const lines = generatedText.split('\n'); let currentSlide = null; let yPos = 1.0; function addText(text, opts = {}) { if (!currentSlide) createSlide("개요"); currentSlide.addText(text, { x: 0.5, y: yPos, w: 12.3, fontSize: 14, color: '333333', fontFace: '맑은 고딕', ...opts }); yPos += (opts.h || 0.4); } function createSlide(title) { currentSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' }); currentSlide.title = title; currentSlide.addText(title, { x: 0.5, y: 0.2, w: 12, h: 0.5, fontSize: 24, bold: true, color: 'FFFFFF', fontFace: '맑은 고딕' }); yPos = 1.0; } let tableRows = []; let inTable = false; for (let i = 0; i < lines.length; i++) { let line = lines[i].trim(); if (line.startsWith('#')) { createSlide(line.replace(/^#+\s*/, '')); continue; } if (line.startsWith('![') && line.includes('](data:image')) { const match = line.match(/\((data:image\/[^;]+;base64,[^)]+)\)/); if (match && match[1]) { if (!currentSlide) createSlide("도식화"); currentSlide.addImage({ data: match[1], x: 2, y: yPos, w: 6, h: 4 }); yPos += 4.2; } continue; } if (line.startsWith('|')) { if (line.includes('---')) continue; const cells = line.split('|').filter((c, idx, arr) => idx > 0 && idx < arr.length - 1).map(c => c.trim().replace(/\*\*/g,'')); const rowObj = cells.map((cellText, idx) => { return { text: cellText, options: { align: idx === 0 ? 'left' : 'right', fontFace: '맑은 고딕', fontSize: 10 } }; }); tableRows.push(rowObj); inTable = true; continue; } else if (inTable) { if (tableRows.length > 0) { if (!currentSlide) createSlide("데이터 표"); currentSlide.addTable(tableRows, { x: 0.5, y: yPos, w: 12.3, border: { pt: 1, color: 'CCCCCC' }, fill: { color: 'F9FAFB' }, autoPage: true, headFill: { color: 'E2E8F0' }, headBold: true, headColor: '1E293B' }); yPos += (tableRows.length * 0.4) + 0.2; } inTable = false; tableRows = []; } if (line.toLowerCase().startsWith('source') || line.startsWith('> Source')) { addText(line.replace(/^>\s*/, ''), { fontSize: 9, color: '64748B', h: 0.3 }); continue; } const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)/); if (listMatch) { const indentLevel = Math.floor(listMatch[1].length / 2); const textContent = listMatch[3].replace(/\*\*/g, ''); addText(textContent, { bullet: true, indentLevel: indentLevel, h: 0.4, breakLine: true }); } else if (line.length > 0) { addText(line.replace(/\*\*/g, ''), { h: 0.4, breakLine: true }); } } if (inTable && tableRows.length) { if(!currentSlide) createSlide("Appendix"); currentSlide.addTable(tableRows, { x: 0.5, y: yPos, w: 12.3, fontSize: 10, border: {pt:1}, autoPage:true }); } pptx.writeFile({ fileName: 'Gemini_IM.pptx' }); });
+        
+        downloadDocxBtn.addEventListener('click', async () => { if (!generatedText) return; const now = new Date(); const dateStr = now.toISOString().slice(0,10).replace(/-/g,""); const timeStr = now.toTimeString().slice(0,5).replace(":",""); const fileName = `Investment_Review_${dateStr}_${timeStr}.docx`; const lines = generatedText.split('\n'); const docChildren = []; function parseRuns(txt) { return txt.split(/(\*\*.*?\*\*)/).map(p => { if(p.startsWith('**')) return new docx.TextRun({text:p.slice(2,-2), bold:true}); return new docx.TextRun({text:p}); }); } let tRows = [], inT = false; for(let line of lines) { line = line.trimRight(); const trimmedLine = line.trim(); if (trimmedLine.startsWith('![') && trimmedLine.includes('](data:image')) { const match = trimmedLine.match(/\((data:image\/[^;]+;base64,[^)]+)\)/); if (match && match[1]) { try { const imageBlob = await fetch(match[1]).then(r => r.blob()); docChildren.push(new docx.Paragraph({ children: [ new docx.ImageRun({ data: await imageBlob.arrayBuffer(), transformation: { width: 400, height: 300 } }) ], alignment: docx.AlignmentType.CENTER, spacing: { after: 200 } })); } catch(e) { console.error("Img fail", e); } } continue; } if(trimmedLine.startsWith('|')) { if(trimmedLine.includes('---')) continue; inT = true; tRows.push(trimmedLine.split('|').filter((c,i,a)=>i>0&&i<a.length-1).map(c=>c.trim())); } else { if(inT && tRows.length) { docChildren.push(new docx.Table({ rows: tRows.map(r => new docx.TableRow({ children: r.map((c, idx) => new docx.TableCell({ children:[new docx.Paragraph({ children:parseRuns(c), alignment: idx === 0 ? docx.AlignmentType.LEFT : docx.AlignmentType.RIGHT })], borders:{top:{style:'single',size:1},bottom:{style:'single',size:1},left:{style:'single',size:1},right:{style:'single',size:1}} })) })), width: {size:100, type:'pct'} })); tRows = []; inT = false; docChildren.push(new docx.Paragraph({text: ""})); } const headerMatch = line.match(/^(#{1,6})\s+(.*)/); if (headerMatch) { const level = headerMatch[1].length; const text = headerMatch[2]; let headingLevel = docx.HeadingLevel.HEADING_1; if (level === 2) headingLevel = docx.HeadingLevel.HEADING_2; if (level === 3) headingLevel = docx.HeadingLevel.HEADING_3; docChildren.push(new docx.Paragraph({ text: text, heading: headingLevel })); } else if(trimmedLine.toLowerCase().startsWith('source') || trimmedLine.startsWith('> Source')) { docChildren.push(new docx.Paragraph({ text:trimmedLine.replace(/^>\s*/,''), alignment: docx.AlignmentType.RIGHT, style: "Normal", indent: { left: 0 } })); } else { const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)/); if (listMatch) { const indentLevel = Math.floor(listMatch[1].length / 4); const textContent = listMatch[3]; docChildren.push(new docx.Paragraph({ children: parseRuns(textContent), bullet: { level: indentLevel } })); } else if(trimmedLine) { docChildren.push(new docx.Paragraph({children:parseRuns(trimmedLine)})); } } } } if(inT && tRows.length) { docChildren.push(new docx.Table({ rows: tRows.map(r => new docx.TableRow({ children: r.map((c, idx) => new docx.TableCell({ children:[new docx.Paragraph({ children:parseRuns(c), alignment: idx === 0 ? docx.AlignmentType.LEFT : docx.AlignmentType.RIGHT })], borders:{top:{style:'single',size:1},bottom:{style:'single',size:1},left:{style:'single',size:1},right:{style:'single',size:1}} })) })), width: {size:100, type:'pct'} })); } const doc = new docx.Document({ sections: [{children: docChildren}] }); saveAs(await docx.Packer.toBlob(doc), fileName); });
     </script>
 </body>
 </html>

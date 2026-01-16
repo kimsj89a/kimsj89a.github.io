@@ -118,8 +118,8 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v3.5</span>
-            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Auto Structure Extraction</span>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v3.8</span>
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Bug Fix</span>
         </div>
     </header>
 
@@ -193,7 +193,7 @@
         <div class="flex-1 flex flex-col lg:flex-row overflow-hidden h-full">
             
             <!-- Input Column -->
-            <section id="input-panel" class="flex-1 flex flex-col border-r border-slate-200 bg-white min-w-[300px] transition-all duration-300 h-auto lg:h-full">
+            <section id="input-panel" class="flex-1 flex flex-col border-r border-slate-200 bg-white min-w-0 lg:min-w-[350px] transition-all duration-300 h-auto lg:h-full">
                 <div class="section-header px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-50 lg:bg-white" onclick="togglePanel('input-panel')">
                     <h2 class="header-title text-lg font-bold text-slate-800 flex items-center gap-2">
                         <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-xs">I</span> 
@@ -238,7 +238,7 @@
                     </div>
 
                     <!-- FOLDER INDEXER (RFI Mode Only) -->
-                    <div id="folder-indexer-section" class="hidden mb-4 flex-1 flex flex-col min-h-0 border-2 border-dashed border-green-200 rounded-xl bg-green-50 p-4 relative group hover:border-green-400 transition-colors">
+                    <div id="folder-indexer-section" class="hidden mb-4 flex-1 flex flex-col min-h-0 w-full border-2 border-dashed border-green-200 rounded-xl bg-green-50 p-4 relative group hover:border-green-400 transition-colors overflow-hidden">
                         <div class="flex items-center justify-between mb-2">
                             <label class="text-sm font-bold text-green-800 flex items-center gap-2">
                                 <span class="text-lg">📁</span> 보유 자료 폴더 스캔 (Folder Scan)
@@ -294,6 +294,24 @@
                         <textarea id="existing-rfi-input" class="w-full h-32 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-y text-sm shadow-sm" placeholder="기존에 작성된 RFI 표가 있다면 이곳에 붙여넣으세요."></textarea>
                     </div>
 
+                    <!-- 5. Format Ref (Moved to Bottom) -->
+                    <div class="space-y-4 mb-2">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-800 mb-2 flex items-center gap-2">
+                                <span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="format-ref-badge">4</span>
+                                <span id="format-ref-label">서식 참고 (Format Ref)</span>
+                            </label>
+                            <div id="drop-zone-format" class="border-2 border-dashed border-slate-300 rounded-lg p-3 hover:bg-slate-50 transition-colors text-center cursor-pointer group">
+                                <input type="file" id="file-input-format" class="hidden" multiple accept=".pdf,.docx,.pptx,.txt,.md,.jpg,.png">
+                                <div class="flex items-center justify-center gap-2 text-slate-600">
+                                    <span class="text-xl">🎨</span>
+                                    <span id="format-ref-text" class="text-sm font-medium">기존 보고서 샘플 드래그 & 드롭</span>
+                                </div>
+                            </div>
+                            <div id="file-list-format" class="mt-2 space-y-1"></div>
+                        </div>
+                    </div>
+
                     <!-- Buttons -->
                     <div class="mt-4 pt-4 border-t border-slate-100">
                         <!-- Standard Buttons -->
@@ -317,7 +335,7 @@
             </section>
 
             <!-- Output Column -->
-            <section id="output-panel" class="flex-1 flex flex-col bg-slate-50 min-w-[350px] relative h-auto lg:h-full">
+            <section id="output-panel" class="flex-1 flex flex-col bg-slate-50 min-w-0 lg:min-w-[400px] relative h-auto lg:h-full">
                 <div class="section-header px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-slate-100 lg:bg-white" onclick="togglePanel('output-panel')">
                     <div class="flex items-center gap-2">
                         <h2 class="header-title text-lg font-bold text-slate-800 flex items-center gap-2">
@@ -434,8 +452,11 @@
         // New Elements for Split RFI Input
         const existingRfiSection = document.getElementById('existing-rfi-section');
         const existingRfiInput = document.getElementById('existing-rfi-input');
+        
+        // Number Badges elements
         const rawDataBadge = document.getElementById('raw-data-badge');
         const contextBadge = document.getElementById('context-badge');
+        const formatRefBadge = document.getElementById('format-ref-badge');
 
         // New: Structure Extraction Elements
         const structureDropZone = document.getElementById('structure-drop-zone');
@@ -444,6 +465,8 @@
         const structureLoading = document.getElementById('structure-loading');
 
         // Dynamic UI Elements
+        const formatRefLabel = document.getElementById('format-ref-label');
+        const formatRefText = document.getElementById('format-ref-text');
         const standardButtons = document.getElementById('standard-buttons');
         const rfiButtons = document.getElementById('rfi-buttons');
         
@@ -479,7 +502,7 @@
         // File handling vars
         let generatedText = "";
         let uploadedDataFiles = [];
-        let uploadedFormatFiles = []; // Kept for logic, but UI merged
+        let uploadedFormatFiles = [];
         let scannedFolderFiles = []; 
         let abortController = null;
         let currentMode = null; 
@@ -548,6 +571,8 @@
         // --- Template Selection & UI Update ---
         function updateUIForTemplate(val) {
             // Reset common UI
+            formatRefLabel.innerText = "서식 참고 (Format Ref)";
+            formatRefText.innerText = "기존 보고서 샘플 드래그 & 드롭";
             standardButtons.classList.remove('hidden');
             rfiButtons.classList.add('hidden');
             folderIndexerSection.classList.add('hidden'); 
@@ -569,6 +594,7 @@
             if (val === 'custom') {
                 structureInput.value = '';
                 structureInput.placeholder = "내용을 비워두면 AI가 제공된 자료를 분석하여 적절한 목차를 스스로 생성합니다.";
+                structureInput.disabled = false;
                 contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">3</span> 대상 기업 및 맥락 (Context)`;
                 contextInput.placeholder = "예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등...";
                 
@@ -589,6 +615,10 @@
                 contextLabel.innerHTML = `<span class="bg-green-100 text-green-600 rounded-full w-5 h-5 flex items-center justify-center text-xs">4</span> 추가 질문 및 확인 사항 (Questions)`;
                 contextInput.placeholder = "예: 재고가 너무 많이 쌓여있는 것 같은데 확인하고 싶어, 대표이사 횡령 이슈 체크";
                 
+                formatRefLabel.innerText = "서식 참고 (선택 사항)";
+                formatRefText.innerText = "기존 엑셀/PDF 양식 드래그 & 드롭";
+                formatRefBadge.textContent = "6"; // Set badge to 6
+                
                 standardButtons.classList.add('hidden');
                 rfiButtons.classList.remove('hidden');
 
@@ -608,6 +638,7 @@
                 // Normal Mode Numbering
                 rawDataBadge.textContent = "2";
                 contextBadge.textContent = "3";
+                formatRefBadge.textContent = "4";
                 
                 contextLabel.innerHTML = `<span class="bg-blue-100 text-blue-600 rounded-full w-5 h-5 flex items-center justify-center text-xs" id="context-badge">3</span> 대상 기업 및 맥락 (Context)`;
                 contextInput.placeholder = "예: 기업명, 핵심 제품, 투자 규모, 시장 상황 등...";
@@ -928,10 +959,10 @@
         }
 
         setupDragAndDrop('drop-zone-data', 'file-input-data', uploadedDataFiles, 'file-list-data', 'removeDataFile');
-        // Removed separate format ref dropzone logic as it's merged, but we need to handle file adding to uploadedFormatFiles in handleStructureFile
-        // Re-using setupDragAndDrop for the structure drop zone just for UI trigger if needed, but handled by click/change listeners above.
+        setupDragAndDrop('drop-zone-format', 'file-input-format', uploadedFormatFiles, 'file-list-format', 'removeFormatFile');
 
         window.removeDataFile = (i) => { uploadedDataFiles.splice(i, 1); renderFileList(uploadedDataFiles, document.getElementById('file-list-data'), 'removeDataFile'); };
+        window.removeFormatFile = (i) => { uploadedFormatFiles.splice(i, 1); renderFileList(uploadedFormatFiles, document.getElementById('file-list-format'), 'removeFormatFile'); };
 
 
         // --- Image Generation Logic ---
@@ -1090,8 +1121,6 @@
             const modelName = modelSelect.value;
             const useDiagram = diagramToggle.checked;
             const thinkingLevel = thinkingLevelSelect.value;
-            
-            // Get RFI specific input
             const rfiExisting = existingRfiInput.value.trim();
 
             if (!structure) {
@@ -1175,7 +1204,7 @@
                     0. **[제공 자료] 자동 생성**: 사용자가 보유한 파일 목록이 제공되면, **가장 먼저 [1. 제공 자료 현황] 표**를 작성하십시오.
                        - 양식: | No. | 파일명 | 제공일자 | 비고 |
                        - 제공일자는 오늘 날짜(${todayDate})로 기재하십시오.
-                    1. **[기존 RFI] 우선 기재**: 사용자가 제공한 **[기존 RFI 데이터]**가 있다면, 해당 내용을 분석하여 Markdown Table의 **상단에 먼저 [2. 기존 RFI 목록]**으로 정리하십시오.
+                    1. **[기존 RFI] 우선 기재**: 사용자가 제공한 **[기존 RFI Copy & Paste]** 데이터가 있다면, 해당 내용을 분석하여 Markdown Table의 **상단에 먼저 [2. 기존 RFI 목록]**으로 정리하십시오.
                     2. **[신규 요청] 추가**: 사용자의 **[신규 요청/질문]**을 분석하고, [기본 실사 체크리스트] 중 누락된 필수 항목을 더해 **[3. 추가 자료 요청 목록]** 표를 작성하십시오. (기존 목록과 중복 제외)
                     3. **질문의 RFI 변환 (필수)**: 사용자의 질문이나 우려 사항이 **정성적 이슈(사유, 배경, 정책 등)**인 경우, 단순 문서명이 아닌 **"~을 확인할 수 있는 자료"** 또는 **"~에 대한 구체적인 설명자료"**와 같이 **질문 형태의 요청 항목**으로 변환하여 기재하십시오. (예: '매출 감소 사유' -> '최근 매출 감소의 구체적인 원인 및 배경을 설명하는 내부 보고서 또는 분석 자료')
                     4. **기본 포함**: 위 [기본 실사 체크리스트] 중 누락된 필수 항목이 있다면 추가 요청 목록에 넣으십시오.
@@ -1191,7 +1220,7 @@
                     const promptParts = [{
                         text: `${systemInstruction}
                         
-                        # [기존 RFI 데이터] (사용자가 붙여넣은 기존 목록)
+                        # [기존 RFI Copy & Paste] (사용자가 붙여넣은 기존 목록)
                         ${rfiExisting ? rfiExisting : "없음"}
 
                         # [신규 요청/질문] (사용자가 새로 입력한 질문)
@@ -1308,12 +1337,12 @@
                             promptParts.push({ text: "\n=== [분석 데이터] ===\n" });
                             uploadedDataFiles.forEach(f => f.text ? promptParts.push({text: f.text}) : promptParts.push({inlineData: {mimeType: f.mimeType, data: f.data}}));
                         }
-                        // Use uploadedFormatFiles here for context if available
                         if(uploadedFormatFiles.length) {
-                            promptParts.push({ text: "\n=== [서식 참고 및 구조 추출 원본] ===\n" });
+                            promptParts.push({ text: "\n=== [서식 참고] ===\n" });
                             uploadedFormatFiles.forEach(f => f.text ? promptParts.push({text: f.text}) : promptParts.push({inlineData: {mimeType: f.mimeType, data: f.data}}));
                         }
 
+                        // *** maxOutputTokens INCREASED to prevent truncation ***
                         const generationConfig = { maxOutputTokens: 65536, temperature: 0.7 };
                         if (modelName.includes('gemini-3')) {
                             promptParts[0].text = `[System: Thinking Level ${thinkingLevel.toUpperCase()}]\n` + promptParts[0].text;
@@ -1381,7 +1410,30 @@
         stopBtn.addEventListener('click', () => abortController?.abort());
         
         // ... (Export Logics: XLS, PPT, DOCX - Kept as is) ...
-         downloadXlsBtn.addEventListener('click', () => { if (!generatedText) return; const lines = generatedText.split('\n'); const data = []; lines.forEach(line => { if (line.trim().startsWith('|')) { if (line.includes('---')) return; const row = line.split('|').filter(c => c.trim() !== '').map(c => c.trim()); const cleanRow = row.map(cell => cell.replace(/\*\*/g, '').replace(/\[.*?\]/g, '')); data.push(cleanRow); } }); if (data.length === 0) { alert("RFI 테이블 데이터를 찾을 수 없습니다."); return; } const ws = XLSX.utils.aoa_to_sheet(data); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "RFI_List"); XLSX.writeFile(wb, "Gemini_RFI_List.xlsx"); });
+         downloadXlsBtn.addEventListener('click', () => { 
+            if (!generatedText) return; 
+            const lines = generatedText.split('\n'); 
+            const data = []; 
+            lines.forEach(line => { 
+                const trimmed = line.trim();
+                if (trimmed.startsWith('|')) { 
+                    if (trimmed.includes('---')) return; 
+                    const row = trimmed.split('|');
+                    // Handle split logic: 
+                    // | cell | cell | -> ["", "cell", "cell", ""]
+                    if(row.length > 0 && row[0].trim() === '') row.shift();
+                    if(row.length > 0 && row[row.length-1].trim() === '') row.pop();
+                    
+                    const cleanRow = row.map(cell => cell.trim().replace(/\*\*/g, '').replace(/<br>/g, '\n').replace(/\[.*?\]/g, '')); 
+                    data.push(cleanRow); 
+                } 
+            }); 
+            if (data.length === 0) { alert("RFI 테이블 데이터를 찾을 수 없습니다."); return; } 
+            const ws = XLSX.utils.aoa_to_sheet(data); 
+            const wb = XLSX.utils.book_new(); 
+            XLSX.utils.book_append_sheet(wb, ws, "RFI_List"); 
+            XLSX.writeFile(wb, "Gemini_RFI_List.xlsx"); 
+        });
 
         downloadPptBtn.addEventListener('click', async () => { if (!generatedText) return; const pptx = new PptxGenJS(); pptx.layout = 'LAYOUT_16x9'; pptx.defineSlideMaster({ title: 'MASTER_SLIDE', background: { color: 'FFFFFF' }, objects: [ { rect: { x: 0, y: 0, w: '100%', h: 0.75, fill: { color: '1E3A8A' } } }, { text: { text: 'Gemini Report', options: { x: 0.5, y: 0.15, w: 9, color: 'FFFFFF', fontSize: 14 } } }, { text: { text: new Date().toLocaleDateString(), options: { x: 10.5, y: 0.15, w: 2.5, color: 'FFFFFF', fontSize: 12, align: 'right' } } } ] }); const lines = generatedText.split('\n'); let currentSlide = null; let yPos = 1.0; function addText(text, opts = {}) { if (!currentSlide) createSlide("개요"); currentSlide.addText(text, { x: 0.5, y: yPos, w: 12.3, fontSize: 14, color: '333333', fontFace: '맑은 고딕', ...opts }); yPos += (opts.h || 0.4); } function createSlide(title) { currentSlide = pptx.addSlide({ masterName: 'MASTER_SLIDE' }); currentSlide.title = title; currentSlide.addText(title, { x: 0.5, y: 0.2, w: 12, h: 0.5, fontSize: 24, bold: true, color: 'FFFFFF', fontFace: '맑은 고딕' }); yPos = 1.0; } let tableRows = []; let inTable = false; for (let i = 0; i < lines.length; i++) { let line = lines[i].trim(); if (line.startsWith('#')) { createSlide(line.replace(/^#+\s*/, '')); continue; } if (line.startsWith('![') && line.includes('](data:image')) { const match = line.match(/\((data:image\/[^;]+;base64,[^)]+)\)/); if (match && match[1]) { if (!currentSlide) createSlide("도식화"); currentSlide.addImage({ data: match[1], x: 2, y: yPos, w: 6, h: 4 }); yPos += 4.2; } continue; } if (line.startsWith('|')) { if (line.includes('---')) continue; const cells = line.split('|').filter((c, idx, arr) => idx > 0 && idx < arr.length - 1).map(c => c.trim().replace(/\*\*/g,'')); const rowObj = cells.map((cellText, idx) => { return { text: cellText, options: { align: idx === 0 ? 'left' : 'right', fontFace: '맑은 고딕', fontSize: 10 } }; }); tableRows.push(rowObj); inTable = true; continue; } else if (inTable) { if (tableRows.length > 0) { if (!currentSlide) createSlide("데이터 표"); currentSlide.addTable(tableRows, { x: 0.5, y: yPos, w: 12.3, border: { pt: 1, color: 'CCCCCC' }, fill: { color: 'F9FAFB' }, autoPage: true, headFill: { color: 'E2E8F0' }, headBold: true, headColor: '1E293B' }); yPos += (tableRows.length * 0.4) + 0.2; } inTable = false; tableRows = []; } if (line.toLowerCase().startsWith('source') || line.startsWith('> Source')) { addText(line.replace(/^>\s*/, ''), { fontSize: 9, color: '64748B', h: 0.3 }); continue; } const listMatch = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)/); if (listMatch) { const indentLevel = Math.floor(listMatch[1].length / 2); const textContent = listMatch[3].replace(/\*\*/g, ''); addText(textContent, { bullet: true, indentLevel: indentLevel, h: 0.4, breakLine: true }); } else if (line.length > 0) { addText(line.replace(/\*\*/g, ''), { h: 0.4, breakLine: true }); } } if (inTable && tableRows.length) { if(!currentSlide) createSlide("Appendix"); currentSlide.addTable(tableRows, { x: 0.5, y: yPos, w: 12.3, fontSize: 10, border: {pt:1}, autoPage:true }); } pptx.writeFile({ fileName: 'Gemini_IM.pptx' }); });
         

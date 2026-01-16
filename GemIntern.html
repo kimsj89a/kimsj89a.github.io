@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEM Intern v4.2</title>
+    <title>GEM Intern v4.3</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -120,8 +120,8 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.2</span>
-            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Top Layout</span>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.3</span>
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Page Limit Fix</span>
         </div>
     </header>
 
@@ -1257,7 +1257,7 @@
                         if (mode === 'WORD') {
                             let detailLevelInstruction = "";
                             if (selectedTemplate === 'simple_review') {
-                                detailLevelInstruction = `2. **작성 분량 및 깊이**: 약 5페이지 분량(Word 기준)의 **간결하면서도 핵심이 담긴 요약 보고서**를 작성하세요. 장황한 나열보다는 핵심 요약과 근거 위주로 명료하게 서술하세요.`;
+                                detailLevelInstruction = `2. **작성 분량 제한 (필수)**: 이 보고서는 약식 검토 목적이므로, 결과물(Word)의 분량이 **절대 10페이지를 넘지 않도록** 내용을 핵심 위주로 강하게 요약하십시오. 장황한 서술을 배제하고, 핵심 논거와 데이터 위주로 압축하여 작성해야 합니다.`;
                             } else {
                                 detailLevelInstruction = `2. **상세 작성**: 제공된 [분석 데이터]의 **모든 페이지**를 꼼꼼히 분석하여, 내용을 축약하지 말고 **최대한 상세하게** 작성하세요. 구체적인 수치(매출액, 영업이익률, CAGR 등)를 반드시 포함하세요.`;
                             }

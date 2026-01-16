@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEM Intern v4.3</title>
+    <title>GEM Intern v4.5</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -45,7 +45,10 @@
         .markdown-preview h3 { font-size: 1.1em; font-weight: bold; margin-top: 1em; margin-bottom: 0.5em; color: #475569; }
         .markdown-preview ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
         .markdown-preview ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
-        .markdown-preview p { margin-bottom: 1em; line-height: 1.7; word-break: break-word; }
+        
+        /* Updated: word-break: keep-all for Korean word wrapping */
+        .markdown-preview p { margin-bottom: 1em; line-height: 1.7; word-break: keep-all; overflow-wrap: break-word; }
+        
         .markdown-preview blockquote { border-left: 4px solid #3b82f6; padding-left: 1rem; color: #475569; background-color: #f1f5f9; padding: 0.5rem 1rem; border-radius: 0 0.5rem 0.5rem 0; margin: 1em 0; }
         .markdown-preview code { background-color: #f3f4f6; padding: 0.2rem 0.4rem; border-radius: 0.25rem; font-family: monospace; font-size: 0.9em; }
         .markdown-preview strong { font-weight: 700; color: #0f172a; }
@@ -120,8 +123,8 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.3</span>
-            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Page Limit Fix</span>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.5</span>
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Compact Layout</span>
         </div>
     </header>
 
@@ -129,66 +132,70 @@
     <section id="settings-panel" class="bg-slate-50 border-b border-slate-200 flex-shrink-0 transition-all duration-300 z-10 shadow-sm">
         <div class="section-header px-6 py-2 flex justify-between items-center bg-slate-100 hover:bg-slate-200 transition-colors" onclick="togglePanel('settings-panel')">
             <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
-                ⚙️ 설정 및 가이드 (Settings & Guide)
+                ⚙️ 설정 (Settings)
             </h2>
             <span class="chevron text-slate-400">▼</span>
         </div>
         
-        <div class="section-content p-5">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Col 1: API & Model -->
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Google API Key</label>
-                        <input type="password" id="api-key" placeholder="API Key 입력" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">사용할 모델 (Model)</label>
-                        <select id="model-select" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
-                            <option value="gemini-3-pro-preview" selected>Gemini 3 Pro Preview</option>
-                            <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
-                            <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
-                            <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                        </select>
-                    </div>
+        <div class="section-content p-4 space-y-4">
+            <!-- Row 1: Settings Inputs (Grid) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <!-- 1. API Key -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Google API Key</label>
+                    <input type="password" id="api-key" placeholder="API Key 입력" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs">
+                </div>
+                
+                <!-- 2. Model -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">사용할 모델 (Model)</label>
+                    <select id="model-select" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white">
+                        <option value="gemini-3-pro-preview" selected>Gemini 3 Pro Preview</option>
+                        <option value="gemini-3-flash-preview">Gemini 3 Flash Preview</option>
+                        <option value="gemini-2.0-flash-exp">Gemini 2.0 Flash Exp</option>
+                        <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
+                    </select>
                 </div>
 
-                <!-- Col 2: Thinking & Diagram -->
-                <div class="space-y-4">
-                    <div id="thinking-level-container">
-                        <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
-                            <span>🧠 사고 수준 (Thinking)</span>
-                            <span class="text-[10px] text-blue-600 bg-blue-50 px-1 rounded">G3 Only</span>
-                        </label>
-                        <select id="thinking-level" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
-                            <option value="high" selected>High (추론 깊이 극대화)</option>
-                            <option value="low">Low (지연 시간/비용 최소화)</option>
-                            <option value="minimal" disabled>Minimal (Flash 전용)</option>
-                        </select>
-                    </div>
-                    <div class="bg-purple-50 p-2 rounded-md border border-purple-100 flex items-center justify-between">
-                        <div>
-                            <label class="text-xs font-bold text-purple-900 block">도식화 이미지 생성</label>
-                            <p class="text-[10px] text-purple-700">복잡한 내용의 다이어그램 자동 생성</p>
+                <!-- 3. Thinking Level -->
+                <div id="thinking-level-container">
+                    <label class="block text-xs font-bold text-slate-700 mb-1 flex items-center justify-between">
+                        <span>🧠 사고 수준 (Thinking)</span>
+                        <span class="text-[10px] text-blue-600 bg-blue-50 px-1 rounded">G3 Only</span>
+                    </label>
+                    <select id="thinking-level" class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-xs bg-white">
+                        <option value="high" selected>High (추론 깊이 극대화)</option>
+                        <option value="low">Low (지연 시간/비용 최소화)</option>
+                        <option value="minimal" disabled>Minimal (Flash 전용)</option>
+                    </select>
+                </div>
+
+                <!-- 4. Diagram Toggle -->
+                <div class="flex items-end">
+                    <div class="w-full bg-purple-50 px-3 py-2 rounded-md border border-purple-100 flex items-center justify-between h-[38px] box-border">
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm">🎨</span>
+                            <label class="text-xs font-bold text-purple-900 cursor-pointer select-none" for="diagram-toggle">도식화 이미지 생성</label>
                         </div>
-                        <input type="checkbox" id="diagram-toggle" class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500">
+                        <input type="checkbox" id="diagram-toggle" class="w-4 h-4 text-purple-600 rounded focus:ring-purple-500 cursor-pointer">
                     </div>
                 </div>
+            </div>
 
-                <!-- Col 3: Guide -->
-                <div class="bg-blue-50 p-3 rounded-md border border-blue-100 h-full flex flex-col justify-center">
-                    <h3 class="text-xs font-bold text-blue-800 mb-1">💡 작성 가이드</h3>
-                    <div class="text-[11px] text-blue-700 space-y-1">
-                        <p>• <strong>약식 검토:</strong> 5pg 내외 요약 보고서</p>
-                        <p>• <strong>RFI 작성:</strong> 자료 요청 리스트 생성 (엑셀)</p>
-                        <p>• <strong>서식 참고:</strong> 삭제됨 (구조 추출 기능 사용 권장)</p>
+            <!-- Row 2: Guide & Footer (Compact Flex Bar) -->
+            <div class="flex flex-col md:flex-row items-center justify-between bg-white p-3 rounded-lg border border-slate-200 shadow-sm gap-3">
+                <div class="flex items-center gap-3 w-full md:w-auto">
+                    <span class="text-xl bg-blue-50 p-1 rounded">💡</span>
+                    <div class="text-xs text-slate-600 flex flex-col md:flex-row md:items-center gap-1 md:gap-4">
+                        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span><strong>약식 검토:</strong> 5pg 내외 요약 (자동압축)</span>
+                        <span class="hidden md:inline text-slate-300">|</span>
+                        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-green-400"></span><strong>RFI 작성:</strong> 자료 요청 리스트 (엑셀)</span>
+                        <span class="hidden md:inline text-slate-300">|</span>
+                        <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-orange-400"></span><strong>뉴스 검색:</strong> '뉴스/동향' 작성 시 Google 검색</span>
                     </div>
                 </div>
-
-                <!-- Col 4: Footer -->
-                <div class="flex flex-col justify-end items-end h-full">
-                     <p class="text-xs text-slate-400 font-medium">Powered by Gemini 3.0</p>
-                     <p class="text-[10px] text-slate-300 mt-1">Copyright By Jean Kim</p>
+                <div class="text-right flex-shrink-0 w-full md:w-auto border-t md:border-t-0 border-slate-100 pt-2 md:pt-0 mt-1 md:mt-0">
+                     <p class="text-[10px] text-slate-400 font-medium">Powered by Gemini 3.0 &nbsp;<span class="text-slate-300">|</span>&nbsp; Copyright By Jean Kim</p>
                 </div>
             </div>
         </div>
@@ -297,8 +304,6 @@
                     </label>
                     <textarea id="existing-rfi-input" class="w-full h-32 p-3 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 resize-y text-sm shadow-sm" placeholder="기존에 작성된 RFI 표가 있다면 이곳에 붙여넣으세요."></textarea>
                 </div>
-
-                <!-- Format Ref Section REMOVED per request v4.0 -->
 
                 <!-- Buttons -->
                 <div class="mt-auto pt-4 border-t border-slate-100">
@@ -539,9 +544,9 @@
 
         // --- Template Logic ---
         const templates = {
-            'simple_review': `# 1. 검토 개요\n   - 검토 배경 및 목적\n   - 대상 기업 요약\n   - 주요 투자 조건\n\n# 2. 회사 현황 (Company Profile)\n   - 설립 및 상장 개요\n   - 주요 사업 현황\n\n# 3. 재무 및 주가 분석\n   - 요약 재무상태 (최근 3년 매출/이익, 자산/부채 현황)\n   - (필요시) 주가 추이 및 거래량 분석\n\n# 4. 주요 동향 및 이슈\n   - 최근 주요 계약\n   - 최근 주요 뉴스\n\n# 5. 종합 의견\n   - 투자 리스크 점검\n   - 최종 검토 의견`,
+            'simple_review': `# Executive Summary\n   - 대상 기업 요약\n   - 주요 투자 조건\n\n# 2. 회사 현황\n   - 설립 및 연혁\n   - 주요 사업 현황\n\n #3. 주요 동향 및 이슈\n   - 최근 주요 계약\n   - 최근 주요 뉴스\n\n#4. 재무 및 주가 분석\n   - 요약 재무상태 (최근 3년 매출/이익, 자산/부채 현황)\n   - (필요시) 주가 추이 및 거래량 분석\n\n#5. 종합 의견\n   - 투자 리스크 점검\n   - 최종 의견`,
             'rfi': `[RFI 작성 모드]\n이 모드에서는 문서 구조가 아닌 '궁금한 사항'을 바탕으로 자료 요청 목록을 생성합니다.\n아래 [4. 추가 질문 및 확인 사항] 칸에 확인하고 싶은 리스크나 의문점을 적거나, [5. 기존 RFI]에 표를 붙여넣으세요.`,
-            'investment': `# 1. 투자내용 (Executive Summary)\n   - 투자개요 (딜 구조, 구주/신주, 사이즈)\n   - 투자조건 (Valuation, 금액, 단가)\n   - 주요 투자 조건 (RCPS, 만기, 배당, 상환/전환권, Refixing)\n   - 자금사용계획 (CAPEX, OPEX)\n   - 지분율 변화 (Pre/Post 투자)\n\n# 2. 회사현황 (Company Profile)\n   - 회사개요 (대표, 설립일, 주요사업, 위치)\n   - 재무현황 (최근 3~4년 요약 재무제표, 매출/이익 추이)\n\n# 3. 시장분석 (Market Analysis)\n   - 산업 트렌드 (거시 환경, 기회 요인)\n   - 시장 규모 및 전망 (TAM/SAM/SOM, CAGR)\n\n# 4. 사업분석 (Business Analysis)\n   - 비즈니스 모델 (매출원 Breakdown)\n   - 핵심 경쟁력 (기술, 독점력, 인프라)\n   - 경쟁사 비교 (우위 요소)\n\n# 5. 투자 타당성 분석 (Valuation & Exit)\n   - 인수가액 분석 (Multiples, Peer 비교)\n   - Value-up 방안\n   - 회수(Exit) 시나리오 (IPO/M&A 수익률 분석)\n\n# 6. 리스크 분석 (Risk Factors)\n   - 주요 리스크 (사업/재무/법률)\n   - 대응 방안 (Mitigation Plan)\n\n# 7. 종합의견 (Conclusion)\n   - 투자 포인트 요약\n   - 최종 심사 의견`,
+            'investment': `# 1. Executive Summary\n   - 투자개요 (딜 구조, 구주/신주, 사이즈)\n   - 투자조건 (Valuation, 금액, 단가)\n   - 주요 투자 조건 (RCPS, 만기, 배당, 상환/전환권, Refixing)\n   - 자금사용계획 (CAPEX, OPEX)\n   - 지분율 변화 (Pre/Post 투자)\n\n# 2. 회사현황 (Company Profile)\n   - 회사개요 (대표, 설립일, 주요사업, 위치)\n   - 재무현황 (최근 3~4년 요약 재무제표, 매출/이익 추이)\n\n# 3. 시장분석 (Market Analysis)\n   - 산업 트렌드 (거시 환경, 기회 요인)\n   - 시장 규모 및 전망 (TAM/SAM/SOM, CAGR)\n\n# 4. 사업분석 (Business Analysis)\n   - 비즈니스 모델 (매출원 Breakdown)\n   - 핵심 경쟁력 (기술, 독점력, 인프라)\n   - 경쟁사 비교 (우위 요소)\n\n# 5. 투자 타당성 분석 (Valuation & Exit)\n   - 인수가액 분석 (Multiples, Peer 비교)\n   - Value-up 방안\n   - 회수(Exit) 시나리오 (IPO/M&A 수익률 분석)\n\n# 6. 리스크 분석 (Risk Factors)\n   - 주요 리스크 (사업/재무/법률)\n   - 대응 방안 (Mitigation Plan)\n\n# 7. 종합의견 (Conclusion)\n   - 투자 포인트 요약\n   - 최종 심사 의견`,
             'im': `# 1. Investment Highlights\n   - 핵심 투자 포인트\n\n# 2. Company Overview\n   - 기업 소개\n   - 연혁 및 비전\n\n# 3. Market Opportunity\n   - 시장의 문제점 (Pain Point)\n   - 해결책 (Solution)\n\n# 4. Product & Technology\n   - 주요 제품/서비스\n   - 기술 경쟁력\n\n# 5. Financial Plan\n   - 추정 손익계산서\n   - 자금 소요 계획 (Use of Proceeds)`,
             'management': `# 1. 운용 개요 (Fund Overview)\n   - 펀드 개황\n   - 운용 성과 요약\n\n# 2. 포트폴리오 주요 현황\n   - 피투자기업 실적 요약\n   - 주요 경영 활동\n\n# 3. 주요 이슈 및 점검 사항\n   - Risk 요인 점검\n   - 대응 방안\n\n# 4. 회수(Exit) 현황 및 계획\n   - 회수 실적\n   - 향후 회수 전략`,
             'custom': ''
@@ -1296,6 +1301,13 @@
                              systemInstruction += `\n\n[추가 지시] 사용자가 별도의 문서 구조를 입력하지 않았습니다. 제공된 데이터의 내용을 바탕으로 **가장 논리적이고 전문적인 목차를 스스로 구성**하여 해당 챕터 내용을 작성하세요.`;
                         }
 
+                        // NEW: Google Grounding Logic for News Section
+                        let toolsPayload = undefined;
+                        if (/뉴스|news|동향|trend|이슈|issue|partner|협력/i.test(sectionTitle)) {
+                             toolsPayload = [{ google_search: {} }];
+                             systemInstruction += `\n\n[Google Grounding 활성화]\n이 챕터(${sectionTitle})는 최신 정보를 반영해야 합니다. Google Search 도구를 사용하여 대상 기업의 최신 뉴스, 파트너십, 시장 동향을 검색하고, 팩트에 기반하여 작성하세요.`;
+                        }
+
                         const promptParts = [{
                             text: `${systemInstruction}
                             
@@ -1321,11 +1333,16 @@
                             promptParts[0].text = `[System: Thinking Level ${thinkingLevel.toUpperCase()}]\n` + promptParts[0].text;
                         }
 
+                        // Include tools in the request body
                         const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${apiKey}`, {
                             method: 'POST',
                             signal: abortController.signal,
                             headers: {'Content-Type': 'application/json'},
-                            body: JSON.stringify({ contents: [{parts: promptParts}], generationConfig: generationConfig })
+                            body: JSON.stringify({ 
+                                contents: [{parts: promptParts}], 
+                                generationConfig: generationConfig,
+                                tools: toolsPayload  // Pass tool config here
+                            })
                         });
 
                         if(!resp.ok) throw new Error((await resp.json()).error?.message || "API Error");

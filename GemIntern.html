@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GEM Intern v4.5</title>
+    <title>GEM Intern v4.7</title>
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,7 +36,8 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
         
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; /* 드래그 방지 */ }
+        /* Updated: h-[100dvh] for better mobile browser support */
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; user-select: none; /* 드래그 방지 */ height: 100dvh; display: flex; flex-direction: column; }
 
         /* Markdown Preview Styles */
         .markdown-preview { user-select: text; /* 결과물은 복사 가능하게 */ transition: all 0.2s; }
@@ -46,7 +47,7 @@
         .markdown-preview ul { list-style-type: disc; padding-left: 1.5em; margin-bottom: 1em; }
         .markdown-preview ol { list-style-type: decimal; padding-left: 1.5em; margin-bottom: 1em; }
         
-        /* Updated: word-break: keep-all for Korean word wrapping */
+        /* word-break: keep-all for Korean word wrapping */
         .markdown-preview p { margin-bottom: 1em; line-height: 1.7; word-break: keep-all; overflow-wrap: break-word; }
         
         .markdown-preview blockquote { border-left: 4px solid #3b82f6; padding-left: 1rem; color: #475569; background-color: #f1f5f9; padding: 0.5rem 1rem; border-radius: 0 0.5rem 0.5rem 0; margin: 1em 0; }
@@ -111,7 +112,7 @@
     </style>
 </head>
 <!-- Disable Context Menu -->
-<body class="text-slate-800 h-screen flex flex-col" oncontextmenu="return false;">
+<body class="text-slate-800 flex flex-col" oncontextmenu="return false;">
 
     <!-- Header -->
     <header class="bg-white border-b border-slate-200 px-6 py-3 flex items-center justify-between shadow-sm z-20 flex-shrink-0">
@@ -123,12 +124,12 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.5</span>
-            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Compact Layout</span>
+            <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded border border-gray-200 font-mono">v4.7</span>
+            <span class="text-xs bg-indigo-100 text-indigo-700 px-2 py-1 rounded font-medium">Mobile Fix</span>
         </div>
     </header>
 
-    <!-- Settings Panel (Moved to Top) -->
+    <!-- Settings Panel (Top) -->
     <section id="settings-panel" class="bg-slate-50 border-b border-slate-200 flex-shrink-0 transition-all duration-300 z-10 shadow-sm">
         <div class="section-header px-6 py-2 flex justify-between items-center bg-slate-100 hover:bg-slate-200 transition-colors" onclick="togglePanel('settings-panel')">
             <h2 class="text-sm font-bold text-slate-500 uppercase tracking-wider flex items-center gap-2">
@@ -202,11 +203,12 @@
     </section>
 
     <!-- Main Container: 2-Column Layout -->
-    <div class="flex flex-col lg:flex-row flex-1 overflow-hidden h-full relative">
+    <!-- Updated: overflow-y-auto on mobile wrapper to fix mobile scrolling -->
+    <div class="flex flex-col lg:flex-row flex-1 overflow-y-auto lg:overflow-hidden h-full relative">
         
         <!-- Input Column (Left, 50%) -->
         <section id="input-panel" class="flex-1 flex flex-col border-r border-slate-200 bg-white min-w-0 transition-all duration-300 h-auto lg:h-full lg:w-1/2">
-            <!-- Header without onclick -->
+            <!-- Header -->
             <div class="px-5 py-3 border-b border-slate-200 flex justify-between items-center bg-white">
                 <h2 class="header-title text-lg font-bold text-slate-800 flex items-center gap-2">
                     <span class="bg-blue-100 text-blue-600 rounded-full w-6 h-6 flex items-center justify-center text-xs">I</span> 
@@ -544,9 +546,9 @@
 
         // --- Template Logic ---
         const templates = {
-            'simple_review': `# Executive Summary\n   - 대상 기업 요약\n   - 주요 투자 조건\n\n# 2. 회사 현황\n   - 설립 및 연혁\n   - 주요 사업 현황\n\n # 3. 주요 동향 및 이슈\n   - 최근 주요 계약\n   - 최근 주요 뉴스\n\n# 4. 재무 및 주가 분석\n   - 요약 재무상태 (최근 3년 매출/이익, 자산/부채 현황)\n   - (필요시) 주가 추이 및 거래량 분석\n\n# 5. 종합 의견\n   - 투자 리스크 점검\n   - 최종 의견`,
+            'simple_review': `# 1. Executive Summary\n   - 대상 기업 요약\n   - 주요 투자 조건\n\n# 2. 회사 현황\n   - 설립 및 연혁\n   - 주요 사업 현황\n\n# 3. 주요 동향 및 이슈\n   - 최근 주요 계약\n   - 최근 주요 뉴스\n\n# 4. 재무 및 주가 분석\n   - 요약 재무상태 (최근 3년 매출/이익, 자산/부채 현황)\n   - (필요시) 주가 추이 및 거래량 분석\n\n# 5. 종합 의견\n   - 투자 리스크 점검\n   - 최종 의견`,
             'rfi': `[RFI 작성 모드]\n이 모드에서는 문서 구조가 아닌 '궁금한 사항'을 바탕으로 자료 요청 목록을 생성합니다.\n아래 [4. 추가 질문 및 확인 사항] 칸에 확인하고 싶은 리스크나 의문점을 적거나, [5. 기존 RFI]에 표를 붙여넣으세요.`,
-            'investment': `# 1. Executive Summary\n   - 투자개요 (딜 구조, 구주/신주, 사이즈)\n   - 투자조건 (Valuation, 금액, 단가)\n   - 주요 투자 조건 (RCPS, 만기, 배당, 상환/전환권, Refixing)\n   - 자금사용계획 (CAPEX, OPEX)\n   - 지분율 변화 (Pre/Post 투자)\n\n# 2. 회사현황 (Company Profile)\n   - 회사개요 (대표, 설립일, 주요사업, 위치)\n   - 재무현황 (최근 3~4년 요약 재무제표, 매출/이익 추이)\n\n# 3. 시장분석 (Market Analysis)\n   - 산업 트렌드 (거시 환경, 기회 요인)\n   - 시장 규모 및 전망 (TAM/SAM/SOM, CAGR)\n\n# 4. 사업분석 (Business Analysis)\n   - 비즈니스 모델 (매출원 Breakdown)\n   - 핵심 경쟁력 (기술, 독점력, 인프라)\n   - 경쟁사 비교 (우위 요소)\n\n# 5. 투자 타당성 분석 (Valuation & Exit)\n   - 인수가액 분석 (Multiples, Peer 비교)\n   - Value-up 방안\n   - 회수(Exit) 시나리오 (IPO/M&A 수익률 분석)\n\n# 6. 리스크 분석 (Risk Factors)\n   - 주요 리스크 (사업/재무/법률)\n   - 대응 방안 (Mitigation Plan)\n\n# 7. 종합의견 (Conclusion)\n   - 투자 포인트 요약\n   - 최종 심사 의견`,
+            'investment': `# 1. 투자내용 (Executive Summary)\n   - 투자개요 (딜 구조, 구주/신주, 사이즈)\n   - 투자조건 (Valuation, 금액, 단가)\n   - 주요 투자 조건 (RCPS, 만기, 배당, 상환/전환권, Refixing)\n   - 자금사용계획 (CAPEX, OPEX)\n   - 지분율 변화 (Pre/Post 투자)\n\n# 2. 회사현황 (Company Profile)\n   - 회사개요 (대표, 설립일, 주요사업, 위치)\n   - 재무현황 (최근 3~4년 요약 재무제표, 매출/이익 추이)\n\n# 3. 시장분석 (Market Analysis)\n   - 산업 트렌드 (거시 환경, 기회 요인)\n   - 시장 규모 및 전망 (TAM/SAM/SOM, CAGR)\n\n# 4. 사업분석 (Business Analysis)\n   - 비즈니스 모델 (매출원 Breakdown)\n   - 핵심 경쟁력 (기술, 독점력, 인프라)\n   - 경쟁사 비교 (우위 요소)\n\n# 5. 투자 타당성 분석 (Valuation & Exit)\n   - 인수가액 분석 (Multiples, Peer 비교)\n   - Value-up 방안\n   - 회수(Exit) 시나리오 (IPO/M&A 수익률 분석)\n\n# 6. 리스크 분석 (Risk Factors)\n   - 주요 리스크 (사업/재무/법률)\n   - 대응 방안 (Mitigation Plan)\n\n# 7. 종합의견 (Conclusion)\n   - 투자 포인트 요약\n   - 최종 심사 의견`,
             'im': `# 1. Investment Highlights\n   - 핵심 투자 포인트\n\n# 2. Company Overview\n   - 기업 소개\n   - 연혁 및 비전\n\n# 3. Market Opportunity\n   - 시장의 문제점 (Pain Point)\n   - 해결책 (Solution)\n\n# 4. Product & Technology\n   - 주요 제품/서비스\n   - 기술 경쟁력\n\n# 5. Financial Plan\n   - 추정 손익계산서\n   - 자금 소요 계획 (Use of Proceeds)`,
             'management': `# 1. 운용 개요 (Fund Overview)\n   - 펀드 개황\n   - 운용 성과 요약\n\n# 2. 포트폴리오 주요 현황\n   - 피투자기업 실적 요약\n   - 주요 경영 활동\n\n# 3. 주요 이슈 및 점검 사항\n   - Risk 요인 점검\n   - 대응 방안\n\n# 4. 회수(Exit) 현황 및 계획\n   - 회수 실적\n   - 향후 회수 전략`,
             'custom': ''
@@ -1028,6 +1030,13 @@
 
 
         // --- Refinement Logic ---
+        // Enter key support for refinement
+        refinementInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                refineBtn.click();
+            }
+        });
+
         refineBtn.addEventListener('click', async () => {
             const refineQuery = refinementInput.value.trim();
             if (!refineQuery) return alert("추가 요청 사항을 입력해주세요.");
@@ -1431,4 +1440,3 @@
     </script>
 </body>
 </html>
-

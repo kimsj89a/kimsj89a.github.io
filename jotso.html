@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>✨초-고품격 좃소 작명/판독기 v2.0✨</title>
+    <style>
+        /* 2000년대 감성 스타일 유지 */
+        body {
+            background-color: #f0f0f0;
+            font-family: "Gulim", "굴림", sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: white;
+            border: 3px solid #000080;
+            padding: 10px;
+        }
+        h1 {
+            color: white;
+            background-color: #000080;
+            padding: 10px;
+            font-size: 24px;
+            margin-top: 0;
+            text-shadow: 2px 2px #ff0000;
+        }
+        .marquee-container {
+            background-color: #ffffcc;
+            color: red;
+            font-weight: bold;
+            border: 1px solid #999;
+            margin-bottom: 20px;
+            padding: 5px;
+        }
+        .section {
+            border: 2px groove #ddd;
+            padding: 15px;
+            margin-bottom: 20px;
+            background-color: #eef;
+        }
+        h2 {
+            font-size: 18px;
+            color: #0066cc;
+            text-decoration: underline;
+        }
+        input[type="text"] {
+            padding: 5px;
+            width: 60%;
+            border: 2px inset #ccc;
+            font-family: "Gulim", "굴림";
+        }
+        button {
+            padding: 5px 15px;
+            background-color: #ddd;
+            border: 2px outset #fff;
+            cursor: pointer;
+            font-family: "Gulim", "굴림";
+            font-weight: bold;
+        }
+        button:active {
+            border: 2px inset #fff;
+        }
+        .result-box {
+            margin-top: 15px;
+            border: 1px dotted black;
+            padding: 10px;
+            background-color: #fff;
+            display: none;
+        }
+        .score {
+            font-size: 30px;
+            color: red;
+            font-weight: bold;
+        }
+        .logo-canvas {
+            border: 1px solid #ccc;
+            margin-top: 10px;
+            background-color: white;
+        }
+        .footer {
+            font-size: 11px;
+            color: #888;
+            margin-top: 20px;
+        }
+        .blink {
+            animation: blinker 1s linear infinite;
+        }
+        @keyframes blinker {
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🏭 좃소 작명소 v2.0 🏭</h1>
+    
+    <div class="marquee-container">
+        <marquee scrollamount="6">
+            ※ 경축 ※ (주)믿음파트너스 코스닥 상장 실패 ※ 가족 같은 회사 ※ 24시간 상담 가능 ※ 열정페이 환영 ※ 내일채움공제 불가 ※
+        </marquee>
+    </div>
+
+    <div class="section">
+        <h2>📊 1. 좃소력(力) 판독기</h2>
+        <p>우리 회사의 근본력을 측정합니다.</p>
+        <input type="text" id="inputName" placeholder="회사명을 입력하세요 (예: 태화고무)">
+        <button onclick="evaluateCompany()">판독하기</button>
+        
+        <div id="evalResult" class="result-box">
+            <div id="evalText"></div>
+            <canvas id="evalLogo" width="200" height="100" class="logo-canvas"></canvas>
+        </div>
+    </div>
+
+    <hr style="border: 1px dashed #bbb;">
+
+    <div class="section">
+        <h2>🎲 2. 운명의 사명 짓기</h2>
+        <p>미래의 직장과 상세 근무조건을 알려드립니다.</p>
+        <button onclick="generateName()" style="width: 100%; height: 50px; font-size: 16px; background-color: #ffcccc;">
+            🎰 운명의 레버 당기기 (CLICK) 🎰
+        </button>
+        
+        <div id="genResult" class="result-box">
+            <canvas id="genLogo" width="300" height="120" class="logo-canvas"></canvas>
+            <div id="genText" style="text-align: left; margin-top: 10px; font-size: 13px; line-height: 1.6;"></div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Total Visitors: <span style="color:red">58,024,119</span><br>
+        Copyright © 2002 Jotso Naming System. All rights reserved.
+    </div>
+</div>
+
+<script>
+    // --- 1. 데이터 베이스 확장 ---
+    const prefixes = [
+        "믿음", "제일", "으뜸", "첨단", "ONE", "남동", "대신", "우성", "우리", "부성",
+        "태화", "효진", "두원", "인성", "진성", "월드", "명성", "코리아", "대륙", "일신",
+        "형제", "백두", "태양", "금강", "하나", "특수", "쌍마", "신화", "벨엘", "유진",
+        "동방", "청마", "한마음", "세기", "미래", "글로벌", "인터"
+    ];
+    
+    // '파트너스' 추가됨
+    const suffixes = [
+        "테크", "텍", "파워", "상사", "피아", "파인", "시스템", "공업", "기술",
+        "볼트", "금속", "스텐", "연마", "도장", "특장", "닥트", "비철", "만물", "워터",
+        "기계", "전기", "전파", "합성", "기전", "eng", "이엔지", "켐", "정밀", "네트워크",
+        "파트너스", "솔루션", "개발", "산업", "유통", "물산"
+    ];
+
+    // 업종별 설명 매핑
+    const businessTypes = {
+        "테크": "홈페이지 공사중(5년째), 사장님 컴맹",
+        "상사": "주로 중국산 수입 후 포장갈이 전문 (보따리상)",
+        "시스템": "SI 업체. 파견 나가면 본사 잊어버림",
+        "금속": "공장 내 프레스 소음 120dB (귀마개 필수)",
+        "이엔지": "에어컨, 배관, 전기 공사. 여름에 죽어남",
+        "네트워크": "PC방 유지보수 혹은 다단계 의심",
+        "파트너스": "주식 리딩방 운영 혹은 보험 영업 (둘 중 하나임)",
+        "솔루션": "문제 해결은 못하고 문제만 일으키는 솔루션",
+        "Default": "정체불명의 제조/유통업 (주6일 근무)"
+    };
+
+    // --- 확장된 50가지 특징 데이터 (팩트 폭격) ---
+    const randomFeatures = [
+        "잡코리아에 365일 채용 공고 올라와 있음",
+        "추석 선물로 식용유 세트(스팸 아님) 줌",
+        "탕비실에 맥심 모카골드만 3,000개 쌓여있음",
+        "사장님 아들이 이사님 (낙하산)",
+        "화장실 갈 때 휴지 챙겨가야 함 (공용 화장실)",
+        "점심시간에 불 끄고 엎드려서 자야 함",
+        "연차 쓰려면 사유서 A4 한 장 써야 함",
+        "회식 메뉴는 무조건 삼겹살에 소주 (사장님 취향)",
+        "사무실에서 슬리퍼 끄는 소리 촥촥 남",
+        "컴퓨터 켜는 데 10분 걸림 (Windows 7 사용)",
+        "여름엔 덥고 겨울엔 추운 친환경 사무실",
+        "사장님이 CCTV로 직원들 감시함",
+        "퇴직금은 퇴직 후 14일 뒤에 간신히 들어옴",
+        "월급날이 10일인데 12일에 들어올 때 있음",
+        "야근 식대 6,000원 지원 (김밥천국)",
+        "청소 아주머니 안 계셔서 직원이 돌아가며 청소",
+        "신입사원 3개월 수습기간에 80% 지급",
+        "명절 떡값 대신 떡을 줌",
+        "토요일 격주 근무 (오전 근무라 쓰고 3시 퇴근)",
+        "근로계약서를 입사 3달 뒤에 작성함",
+        "사장님이 주말에 등산 가자고 함",
+        "법인카드는 사장님 사모님이 장볼 때 씀",
+        "경리 이모가 실세임 (사장님보다 무서움)",
+        "거래처에서 돈 대신 물건으로 받아옴",
+        "회사 차가 다마스 아니면 포터 (수동)",
+        "정수기 물통 직원이 직접 갈아야 함",
+        "복합기 토너 아끼라고 흑백 출력 강요",
+        "내일채움공제 해준다고 해놓고 말 바꿈",
+        "체육대회 때 장기자랑 시킴",
+        "워크샵 가서 사장님 자서전 낭독회 함",
+        "공휴일에 연차 까고 쉬라고 함",
+        "사무실 파티션이 옥색(옥장판 색)임",
+        "흡연실이 회사 정문 바로 앞이라 냄새 남",
+        "점심 먹고 다 같이 양치하면서 수다 떰",
+        "업무용 메신저 안 쓰고 카톡 씀 (단톡방 20개)",
+        "퇴근 후 업무 연락 오면 씹으면 혼남",
+        "회사 로고가 사장님이 그림판으로 그림",
+        "직급만 부장이고 팀원은 없음",
+        "면접 볼 때 '술 잘 마셔요?' 물어봄",
+        "회식 2차 노래방에서 탬버린 쳐야 함",
+        "사무실 화분에 물 주는 담당자가 정해져 있음",
+        "여직원에게 커피 타오라고 눈치 줌",
+        "남직원은 정수기 물통, 짐 나르기 전담",
+        "사훈 액자가 삐뚤어져 있는데 아무도 안 고침",
+        "달력은 거래처 은행에서 받은 거 씀",
+        "회의 시간에 사장님 혼자 1시간 떠듦",
+        "입사 첫날 아무도 뭘 해야 할지 안 알려줌",
+        "3년 근속하면 장기근속자 대우 받음",
+        "퇴사한다고 하면 배신자 취급함"
+    ];
+
+    // --- 확장된 50가지 사훈 데이터 (꼰대 감성) ---
+    const mottos = [
+        "가족 같은 회사 (가족이라 돈 안 줌)",
+        "창의와 도전 (시키는 대로 해라)",
+        "글로벌 리더 (수출 실적 0원)",
+        "고객 감동 (사장님 감동)",
+        "인화 단결 (회식 불참 금지)",
+        "미래 창조 (내일 망할 수도 있음)",
+        "주인의식을 가져라 (주인은 나니까)",
+        "안되면 되게 하라 (되게 하다가 병남)",
+        "하면 된다 (야근하면 된다)",
+        "위기를 기회로 (월급 밀리는 위기)",
+        "초일류 기업 (마음만은 삼성)",
+        "고객은 왕이다 (진상도 왕이다)",
+        "성실, 근면, 정직 (노예의 덕목)",
+        "최고를 향하여 (최저임금을 주며)",
+        "피할 수 없으면 즐겨라 (못 피함)",
+        "일이 즐거운 회사 (거짓말)",
+        "사람이 미래다 (사람 갈아 넣음)",
+        "열정 없는 삶은 죽은 삶이다 (죽겠음)",
+        "상상이 현실이 된다 (야근이 현실)",
+        "오늘 흘린 땀은 배신하지 않는다",
+        "꿈과 희망이 있는 일터",
+        "변화와 혁신 (간판만 바꿈)",
+        "생각하는 기업 (잡생각 금지)",
+        "세계로 미래로 (출장은 지방으로)",
+        "닦고 조이고 기름치자",
+        "안전 제일 (안전모 없음)",
+        "품질 경영 (반품 들어옴)",
+        "기술 보국 (기술 없음)",
+        "신용 제일 (대출 막힘)",
+        "상생 경영 (하청 업체 쥐어짜기)",
+        "고객의 행복이 우리의 기쁨",
+        "작은 차이가 명품을 만든다",
+        "기본에 충실하자 (월급은 기본이 아님)",
+        "우리는 하나다 (너는 남이다)",
+        "긍정적인 마인드 (가스라이팅)",
+        "실패를 두려워하지 마라 (책임은 니가)",
+        "도전하는 자가 아름답다",
+        "열린 경영 (문만 열려있음)",
+        "투명 경영 (월급봉투가 투명함)",
+        "가치 창조",
+        "혁신 성장",
+        "나부터 변하자 (너부터 변해라)",
+        "시간은 금이다 (내 시간은 똥)",
+        "약속은 지키라고 있는 것 (근로계약서는?)",
+        "웃으며 인사하자",
+        "깨어있는 의식",
+        "행동하는 양심",
+        "사랑과 봉사",
+        "정성을 다하는 기업",
+        "내 회사처럼 일하자"
+    ];
+
+    // --- 2. 로고 그리기 함수 ---
+    function drawLogo(canvasId, text) {
+        const canvas = document.getElementById(canvasId);
+        const ctx = canvas.getContext("2d");
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        ctx.beginPath();
+        ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width / 2 - 10, canvas.height / 2 - 20, 0, 0, 2 * Math.PI);
+        ctx.fillStyle = "#0000FF";
+        ctx.fill();
+
+        ctx.fillStyle = "white";
+        ctx.font = "bold 24px Gulim";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+        
+        ctx.font = "12px Gulim";
+        ctx.fillStyle = "black";
+        ctx.fillText("(주)", 20, 20);
+    }
+
+    // --- 3. 판독기 로직 ---
+    function evaluateCompany() {
+        const name = document.getElementById("inputName").value.trim();
+        if (!name) { alert("회사 이름을 입력해라 친구야."); return; }
+
+        let score = 0;
+        let keywords = [];
+
+        prefixes.forEach(p => {
+            if (name.includes(p)) { score += 30; keywords.push(p); }
+        });
+        suffixes.forEach(s => {
+            if (name.toLowerCase().includes(s.toLowerCase())) { score += 30; keywords.push(s); }
+        });
+        
+        const pangyoWords = ["랩", "소프트", "스튜디오", "Lab", "Soft", "Studio", "AI", "플랫폼"];
+        pangyoWords.forEach(w => {
+            if (name.toLowerCase().includes(w.toLowerCase())) { score -= 15; keywords.push("판교감성(-15)"); }
+        });
+
+        let grade, comment;
+        if (score >= 80) {
+            grade = "👑 전설의 좃소 (S급)";
+            comment = "야근수당? 그게 뭐죠? 먹는 건가요?";
+        } else if (score >= 40) {
+            grade = "🏭 든든한 중소 (A급)";
+            comment = "사장님 차는 벤츠, 내 차는 마을버스.";
+        } else {
+            grade = "🌱 스타트업 호소인 (B급)";
+            comment = "아직 배가 불렀음. 이름을 더 투박하게 지으세요.";
+        }
+
+        const resultBox = document.getElementById("evalResult");
+        resultBox.style.display = "block";
+        document.getElementById("evalText").innerHTML = `
+            <div class='score'>좃소력: ${score}점</div>
+            <b>등급:</b> ${grade}<br>
+            <b>발견된 키워드:</b> ${keywords.join(", ") || "없음"}<br>
+            <br>
+            <span class='blink'>[한줄평] ${comment}</span>
+        `;
+        drawLogo("evalLogo", name);
+    }
+
+    // --- 4. 랜덤 작명기 로직 (업데이트) ---
+    function generateName() {
+        const isLegendary = Math.random() < 0.2;
+        let name = "";
+        
+        const p1 = prefixes[Math.floor(Math.random() * prefixes.length)];
+        const s1 = suffixes[Math.floor(Math.random() * suffixes.length)];
+        
+        if (isLegendary) {
+            let p2 = prefixes[Math.floor(Math.random() * prefixes.length)];
+            while(p1 === p2) { p2 = prefixes[Math.floor(Math.random() * prefixes.length)]; }
+            name = p1 + p2 + s1;
+        } else {
+            name = p1 + s1;
+        }
+
+        // 업종 찾기 (접미사 기준)
+        let bizType = businessTypes["Default"];
+        for (const key in businessTypes) {
+            if (s1.includes(key) || key.includes(s1)) {
+                bizType = businessTypes[key];
+                break;
+            }
+        }
+
+        // 랜덤 특징 추출
+        const randomFeature = randomFeatures[Math.floor(Math.random() * randomFeatures.length)];
+        
+        // 사훈 추출
+        const motto = mottos[Math.floor(Math.random() * mottos.length)];
+
+        const resultBox = document.getElementById("genResult");
+        resultBox.style.display = "block";
+        drawLogo("genLogo", name);
+        
+        document.getElementById("genText").innerHTML = `
+            <div style="border-bottom: 1px dotted #999; padding-bottom: 5px; margin-bottom: 5px;">
+                <b>기업명:</b> <span style="font-size: 18px; color: blue;">(주)${name}</span>
+            </div>
+            <b>[업종]</b> ${bizType}<br>
+            <b>[특징]</b> <span style="color:red;">${randomFeature}</span><br>
+            <b>[사훈]</b> <span style="background-color:black; color:white; padding: 0 4px;">"${motto}"</span>
+        `;
+    }
+</script>
+
+</body>
+</html>
